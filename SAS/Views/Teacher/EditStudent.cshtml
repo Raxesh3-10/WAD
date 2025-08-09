@@ -1,0 +1,37 @@
+﻿@model SAS.Models.Student
+@{
+    ViewData["Title"] = "Edit Student";
+}
+
+<h3 class="mb-3 text-warning">Edit Student</h3>
+
+<form method="post">
+    <div class="mb-2">
+        <input asp-for="StudentName" class="form-control" placeholder="Student Name" required />
+    </div>
+    <div class="mb-2">
+        <input asp-for="FatherName" class="form-control" placeholder="Father Name" required />
+    </div>
+    <div class="mb-2">
+        <input asp-for="MotherName" class="form-control" placeholder="Mother Name" required />
+    </div>
+    <div class="mb-2">
+        <input asp-for="Email" class="form-control" placeholder="Email" readonly />
+    </div>
+    <div class="mb-2">
+        <input asp-for="AadharNo" class="form-control" placeholder="Aadhar No" required />
+    </div>
+    <div class="mb-2">
+        <input asp-for="RollNo" class="form-control" placeholder="Roll Number" required />
+    </div>
+    <div class="mb-2">
+        <input asp-for="Div" class="form-control" placeholder="Division" required />
+    </div>
+    <div class="mb-2">
+        <input asp-for="Std" class="form-control" placeholder="Standard" required />
+    </div>
+    <div class="mb-2">
+        <input asp-for="PhoneNo" class="form-control" placeholder="Phone Number" required />
+    </div>
+    <button type="submit" class="btn btn-primary">Update</button>
+</form>

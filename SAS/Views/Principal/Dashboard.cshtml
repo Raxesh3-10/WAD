@@ -1,0 +1,150 @@
+﻿@model List<SAS.Models.Student>
+@{
+    ViewData["Title"] = "Principal Dashboard";
+    var profile = ViewBag.Profile as SAS.Models.User;
+    var teachers = ViewBag.Teachers as List<SAS.Models.User>;
+    var grouped = ViewBag.GroupedStudents as Dictionary<string, Dictionary<string, List<SAS.Models.Student>>>;
+}
+
+<div class="container mt-4">
+    <div class="card mb-4">
+        <div class="card-body">
+            <h3 class="text-primary">Welcome, @profile.Name <small class="text-muted">(Principal)</small></h3>
+            <p><strong>Email:</strong> @profile.Email</p>
+            <p><strong>Salary:</strong> ₹@profile.Salary</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <h4>Filter Students</h4>
+            <div class="card p-3 mb-4">
+                <div class="mb-3">
+                    <label>Select Standard:</label>
+                    <select id="stdSelect" class="form-select">
+                        <option value="">-- Select Std --</option>
+                        @foreach (var std in grouped.Keys.OrderBy(s => int.Parse(s)))
+                        {
+                            <option value="@std">Std @std</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label>Select Division:</label>
+                    <select id="divSelect" class="form-select" disabled>
+                        <option value="">-- Select Div --</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-primary" id="showStudentsBtn" disabled>Show Students</button>
+            </div>
+
+            <div id="filteredStudents"></div>
+
+            <h4>All Students <a asp-action="CreateStudent" class="btn btn-sm btn-success float-end">Add</a></h4>
+            @for (int std = 1; std <= 12; std++)
+            {
+                var stdGroup = Model.Where(s => s.Std == std).GroupBy(s => s.Div.ToUpper()).ToList();
+                if (stdGroup.Any())
+                {
+                    <div class="card mb-3">
+                        <div class="card-header bg-secondary text-white">Standard @std</div>
+                        <div class="card-body p-2">
+                            @foreach (var divGroup in stdGroup)
+                            {
+                                <div class="mb-2">
+                                    <strong>Div @divGroup.Key</strong>
+                                    <ul class="list-group">
+                                        @foreach (var s in divGroup)
+                                        {
+                                            <li class="list-group-item d-flex justify-content-between">
+                                                @s.StudentName
+                                                <span>
+                                                    <a asp-controller="Principal" asp-action="EditStudent" asp-route-email="@s.Email" class="btn btn-sm btn-warning">Edit</a>
+                                                    <a asp-controller="Principal" asp-action="DeleteStudent" asp-route-email="@s.Email" class="btn btn-sm btn-danger">Delete</a>
+                                                </span>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+
+        <div class="col-md-6">
+            <h4>Teachers</h4>
+            <ul class="list-group">
+                @foreach (var t in teachers)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        @t.Name - ₹@t.Salary
+                        <span>
+                            <button class="btn btn-sm btn-outline-success">Active</button>
+                            <button class="btn btn-sm btn-outline-danger">Inactive</button>
+                        </span>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("_BugReportModal", profile)
+
+@section Scripts {
+    <script>
+        const grouped = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.GroupedStudents));
+
+        const stdSelect = document.getElementById("stdSelect");
+        const divSelect = document.getElementById("divSelect");
+        const showBtn = document.getElementById("showStudentsBtn");
+        const studentContainer = document.getElementById("filteredStudents");
+
+        stdSelect.addEventListener("change", () => {
+            const std = stdSelect.value;
+            divSelect.innerHTML = '<option value="">-- Select Div --</option>';
+
+            if (std && grouped[std]) {
+                const divs = Object.keys(grouped[std]);
+                divs.forEach(div => {
+                    const opt = document.createElement("option");
+                    opt.value = div;
+                    opt.textContent = div;
+                    divSelect.appendChild(opt);
+                });
+                divSelect.disabled = false;
+            } else {
+                divSelect.disabled = true;
+                showBtn.disabled = true;
+            }
+        });
+
+        divSelect.addEventListener("change", () => {
+            showBtn.disabled = !divSelect.value;
+        });
+
+        showBtn.addEventListener("click", () => {
+            const std = stdSelect.value;
+            const div = divSelect.value;
+
+            const students = grouped[std]?.[div] ?? [];
+            let html = `<h5>Students of Std ${std} - Div ${div}</h5>`;
+            html += `<ul class="list-group mb-3">`;
+            students.forEach(s => {
+                html += `<li class="list-group-item d-flex justify-content-between">
+                            ${s.StudentName}
+                            <span>
+                                <a class="btn btn-sm btn-warning" href="/Principal/EditStudent?email=${s.Email}">Edit</a>
+                                <a class="btn btn-sm btn-danger" href="/Principal/DeleteStudent?email=${s.Email}">Delete</a>
+                            </span>
+                         </li>`;
+            });
+            html += `</ul>`;
+            studentContainer.innerHTML = html;
+        });
+    </script>
+}

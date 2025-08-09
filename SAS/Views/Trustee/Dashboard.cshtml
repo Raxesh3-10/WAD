@@ -1,0 +1,51 @@
+﻿@{
+    ViewData["Title"] = "Trustee Dashboard";
+    var profile = ViewBag.Profile as SAS.Models.User;
+    var teachers = ViewBag.Teachers as List<SAS.Models.User>;
+    var principals = ViewBag.Principals as List<SAS.Models.User>;
+}
+
+<div class="container mt-4">
+    <div class="card mb-4">
+        <div class="card-body">
+            <h3 class="text-primary">Welcome, @profile.Name <small class="text-muted">(Trustee)</small></h3>
+            <p><strong>Email:</strong> @profile.Email</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <h4>Teachers</h4>
+            <ul class="list-group">
+                @foreach (var t in teachers)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        @t.Name - ₹@t.Salary
+                        <span>
+                            <button class="btn btn-sm btn-outline-success">Active</button>
+                            <button class="btn btn-sm btn-outline-danger">Inactive</button>
+                        </span>
+                    </li>
+                }
+            </ul>
+        </div>
+
+        <div class="col-md-6">
+            <h4>Principals</h4>
+            <ul class="list-group">
+                @foreach (var p in principals)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        @p.Name - ₹@p.Salary
+                        <span>
+                            <button class="btn btn-sm btn-outline-success">Active</button>
+                            <button class="btn btn-sm btn-outline-danger">Inactive</button>
+                        </span>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("_BugReportModal", profile)

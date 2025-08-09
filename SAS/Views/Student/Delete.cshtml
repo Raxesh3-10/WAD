@@ -1,0 +1,12 @@
+﻿@model SAS.Models.Student
+<h2 class="text-danger">Delete Student</h2>
+
+<div class="alert alert-warning">
+    Are you sure you want to delete <strong>@Model.StudentName</strong>?
+</div>
+
+<form asp-action="DeleteConfirmed" method="post">
+    <input type="hidden" name="email" value="@Model.Email" />
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a href="@Url.Action("Index", "Student")" class="btn btn-secondary">Cancel</a>
+</form>

@@ -1,0 +1,149 @@
+﻿@{
+    ViewData["Title"] = "Teacher Dashboard";
+    var profile = ViewBag.Profile as SAS.Models.User;
+    var groupedStudents = ViewBag.GroupedStudents as Dictionary<string, Dictionary<string, List<SAS.Models.Student>>>;
+
+    var allStds = groupedStudents?.Keys.Select(k => int.Parse(k)).OrderBy(k => k).ToList() ?? new List<int>();
+}
+
+<div class="container mt-4">
+    <div class="card mb-4">
+        <div class="card-body">
+            <h3 class="text-primary">Welcome, @profile.Name <small class="text-muted">(@profile.Role)</small></h3>
+            <p><strong>Email:</strong> @profile.Email</p>
+            <p><strong>Subject:</strong> @profile.Subject</p>
+            <p><strong>Standard:</strong> @profile.Std</p>
+            <p><strong>Division:</strong> @profile.Div</p>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4>Students</h4>
+        <a class="btn btn-success" asp-action="CreateStudent">Add Student</a>
+    </div>
+
+    @if (groupedStudents == null || groupedStudents.Count == 0)
+    {
+        <div class="alert alert-info text-center">
+            No students added yet.
+        </div>
+    }
+    else
+    {
+        <!-- Dropdown Filters -->
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <label>Standard</label>
+                <select id="stdDropdown" class="form-control">
+                    <option value="">-- Select Std --</option>
+                    @foreach (var std in allStds)
+                    {
+                        <option value="@std">Standard @std</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label>Division</label>
+                <select id="divDropdown" class="form-control" disabled>
+                    <option value="">-- Select Div --</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button class="btn btn-primary w-100" onclick="filterStudents()">View Students</button>
+            </div>
+        </div>
+
+        <!-- Student List -->
+        <div id="studentSection">
+            @foreach (var stdPair in groupedStudents.OrderBy(s => int.Parse(s.Key)))
+            {
+                var std = stdPair.Key;
+                var divGroups = stdPair.Value;
+
+                <div class="card mb-3 student-card" data-std="@std">
+                    <div class="card-header bg-secondary text-white">Standard @std</div>
+                    <div class="card-body p-2">
+                        @foreach (var divPair in divGroups.OrderBy(d => d.Key))
+                        {
+                            var div = divPair.Key;
+                            var students = divPair.Value;
+
+                            <div class="mb-2 student-div" data-div="@div">
+                                <strong>Div @div</strong>
+                                <ul class="list-group">
+                                    @foreach (var s in students)
+                                    {
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            @s.StudentName
+                                            <span>
+                                                <a asp-action="EditStudent" asp-route-email="@s.Email" class="btn btn-sm btn-warning">Edit</a>
+                                                <a asp-action="DeleteStudent" asp-route-email="@s.Email" class="btn btn-sm btn-danger">Delete</a>
+                                            </span>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        const groupedStudents = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.GroupedStudents));
+
+        // Populate Div dropdown on Std change
+        document.getElementById('stdDropdown').addEventListener('change', function () {
+            const std = this.value;
+            const divDropdown = document.getElementById('divDropdown');
+            divDropdown.innerHTML = '<option value="">-- Select Div --</option>';
+            divDropdown.disabled = true;
+
+            if (std && groupedStudents[std]) {
+                const divs = Object.keys(groupedStudents[std]);
+                divs.forEach(div => {
+                    const opt = document.createElement('option');
+                    opt.value = div;
+                    opt.textContent = 'Div ' + div;
+                    divDropdown.appendChild(opt);
+                });
+                divDropdown.disabled = false;
+            }
+        });
+
+        function filterStudents() {
+            const selectedStd = document.getElementById('stdDropdown').value;
+            const selectedDiv = document.getElementById('divDropdown').value;
+
+            if (!selectedStd) {
+                alert("Please select at least a Standard.");
+                return;
+            }
+
+            // Show/Hide cards and divisions
+            document.querySelectorAll('.student-card').forEach(card => {
+                const std = card.getAttribute('data-std');
+                const matchStd = std === selectedStd;
+
+                if (matchStd) {
+                    card.style.display = ''; // show card
+                    card.querySelectorAll('.student-div').forEach(div => {
+                        const divValue = div.getAttribute('data-div');
+                        div.style.display = (selectedDiv === "" || divValue === selectedDiv) ? '' : 'none';
+                    });
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Optional: Hide all cards initially (for safety)
+        window.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.student-card').forEach(card => card.style.display = 'none');
+        });
+    </script>
+}
+

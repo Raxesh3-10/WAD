@@ -1,0 +1,110 @@
+﻿@model SAS.Models.User
+@{
+    ViewData["Title"] = "Signup";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h3 class="text-center text-success mb-4">Signup</h3>
+
+                    @if (ViewBag.Error != null)
+                    {
+                        <div class="alert alert-danger">@ViewBag.Error</div>
+                    }
+                    <div  class="text-warning" >
+                        Note: Std, Div, and Salary are not required for Trustees.
+                    </div>
+                    <form method="post">
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label">Full Name</label>
+                            <input asp-for="Name" class="form-control" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label">Email</label>
+                            <input asp-for="Email" type="email" class="form-control" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Password" class="form-label">Password</label>
+                            <input asp-for="Password" type="password" class="form-control" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Role" class="form-label">Role</label>
+                            <select asp-for="Role" asp-items="Html.GetEnumSelectList<UserRole>()" class="form-select" id="roleSelect" required></select>
+                        </div>
+
+                        <!-- Extra Fields for Teacher/Principal but shown always -->
+                        <div id="extraFields">
+                            <div class="mb-3">
+                                <label asp-for="Subject" class="form-label">Subject</label>
+                                <input asp-for="Subject" class="form-control" placeholder="e.g. Math, English" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Std" class="form-label">Standard</label>
+                                <input asp-for="Std" class="form-control" placeholder="1 - 12" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Div" class="form-label">Division</label>
+                                <input asp-for="Div" class="form-control" placeholder="A, B, C..." />
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="Salary" class="form-label">Salary</label>
+                                <input asp-for="Salary" class="form-control" step="0.01" />
+                            </div>
+                        </div>
+
+                        <div class="mb-3 input-group">
+                            <input name="otp" class="form-control" placeholder="Enter OTP" required />
+                            <button type="button" class="btn btn-outline-secondary" onclick="sendOtp()">Send OTP</button>
+                        </div>
+
+                        <div class="text-muted mb-2" id="otpStatus"></div>
+                        <button type="submit" class="btn btn-success w-100">Signup</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function sendOtp() {
+            const email = document.querySelector('[name="Email"]').value;
+            if (!email) return alert("Enter email first");
+            fetch('/User/SendOtp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'email=' + encodeURIComponent(email)
+            })
+                .then(res => res.json())
+                .then(res => document.getElementById('otpStatus').innerText = res.message);
+        }
+
+        function handleRoleChange(role) {
+            const note = document.getElementById("trusteeNote");
+            if (role === "trustee") {
+                note.style.display = "block";
+            } else {
+                note.style.display = "none";
+            }
+        }
+
+        const roleSelect = document.getElementById('roleSelect');
+        roleSelect.addEventListener('change', function () {
+            handleRoleChange(this.value.toLowerCase());
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            handleRoleChange(roleSelect.value.toLowerCase());
+        });
+    </script>
+}

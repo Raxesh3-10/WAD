@@ -1,0 +1,35 @@
+﻿@using Microsoft.AspNetCore.Http
+@{
+    var userEmail = Context.Session.GetString("UserEmail");
+    var userRole = Context.Session.GetString("UserRole");
+    var pageTitle = ViewData["Title"] ?? "SAS";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@pageTitle - SAS</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body class="bg-light">
+    @if (userEmail == null)
+    {
+        @await Html.PartialAsync("_Navbar")
+    }
+    else
+    {
+        @await Html.PartialAsync("_UserNavbar")
+    }
+    
+    <div class="container pt-5 mt-4">
+        @RenderBody()
+    </div>
+
+    @RenderSection("Scripts", required: false)
+    @await Html.PartialAsync("_Footer")
+</body>
+</html>

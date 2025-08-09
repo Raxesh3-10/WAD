@@ -1,0 +1,53 @@
+﻿@model SAS.Models.User
+@{
+    ViewData["Title"] = "Profile";
+}
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-body">
+            <h3 class="text-primary">Your Profile</h3>
+
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger">@ViewBag.Error</div>
+            }
+
+            <form method="post" asp-action="UpdateProfile">
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label">Name</label>
+                    <input asp-for="Name" class="form-control" required />
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label">Email</label>
+                    <input asp-for="Email" class="form-control" readonly />
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label">New Password</label>
+                    <input asp-for="Password" class="form-control" />
+                </div>
+                <div class="mb-3 input-group">
+                    <input type="text" name="otp" class="form-control" placeholder="Enter OTP" required />
+                    <button type="button" class="btn btn-outline-secondary" onclick="sendOtp()">Send OTP</button>
+                </div>
+                <div id="otpStatus" class="text-muted mb-3"></div>
+                <button type="submit" class="btn btn-primary">Update</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function sendOtp() {
+            const email = document.querySelector('[name="Email"]').value;
+            fetch('/User/SendOtp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'email=' + encodeURIComponent(email)
+            })
+                .then(res => res.json())
+                .then(res => document.getElementById('otpStatus').innerText = res.message);
+        }
+    </script>
+}
