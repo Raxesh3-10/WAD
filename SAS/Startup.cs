@@ -34,6 +34,7 @@ namespace SAS
             // Register Repositories
             services.AddScoped<IRepository<Student>, SQLStudentRepository>();
             services.AddScoped<IRepository<User>, SQLUserRepository>();
+            services.AddScoped<IRepository<Notice>, SQLNoticeRepository>();
 
             // Email service
             services.AddTransient<MailService>();

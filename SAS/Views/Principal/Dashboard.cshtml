@@ -1,150 +1,194 @@
-﻿@model List<SAS.Models.Student>
+﻿
 @{
-    ViewData["Title"] = "Principal Dashboard";
+    ViewData["Title"] = "Teacher Dashboard";
     var profile = ViewBag.Profile as SAS.Models.User;
-    var teachers = ViewBag.Teachers as List<SAS.Models.User>;
-    var grouped = ViewBag.GroupedStudents as Dictionary<string, Dictionary<string, List<SAS.Models.Student>>>;
+    var groupedStudents = ViewBag.GroupedStudents as Dictionary<string, Dictionary<string, List<SAS.Models.Student>>>;
+    var notices = ViewBag.Notices as List<SAS.Models.Notice> ?? new List<SAS.Models.Notice>();
+    var allStds = groupedStudents?.Keys.Select(k => int.Parse(k)).OrderBy(k => k).ToList() ?? new List<int>();
 }
 
 <div class="container mt-4">
+    <!-- Profile Card -->
     <div class="card mb-4">
         <div class="card-body">
-            <h3 class="text-primary">Welcome, @profile.Name <small class="text-muted">(Principal)</small></h3>
+            <h3 class="text-primary">Welcome, @profile.Name <small class="text-muted">(@profile.Role)</small></h3>
             <p><strong>Email:</strong> @profile.Email</p>
-            <p><strong>Salary:</strong> ₹@profile.Salary</p>
+            <p><strong>Subject:</strong> @profile.Subject</p>
+            <p><strong>Standard:</strong> @profile.Std</p>
+            <p><strong>Division:</strong> @profile.Div</p>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-md-6">
-            <h4>Filter Students</h4>
-            <div class="card p-3 mb-4">
-                <div class="mb-3">
-                    <label>Select Standard:</label>
-                    <select id="stdSelect" class="form-select">
-                        <option value="">-- Select Std --</option>
-                        @foreach (var std in grouped.Keys.OrderBy(s => int.Parse(s)))
-                        {
-                            <option value="@std">Std @std</option>
-                        }
-                    </select>
-                </div>
+    <!-- Notices Section -->
+    <div class="mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4>Notices</h4>
+            <a class="btn btn-success" asp-action="CreateNotice">Add Notice</a>
+        </div>
 
-                <div class="mb-3">
-                    <label>Select Division:</label>
-                    <select id="divSelect" class="form-select" disabled>
-                        <option value="">-- Select Div --</option>
-                    </select>
-                </div>
-
-                <button class="btn btn-primary" id="showStudentsBtn" disabled>Show Students</button>
+        @if (ViewBag.Notices == null || ((List<SAS.Models.Notice>)ViewBag.Notices).Count == 0)
+        {
+            <div class="alert alert-info text-center">
+                No notices posted yet.
             </div>
+        }
+        else
+        {
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Message</th>
+                        <th>Date</th>
+                        <th>Posted By</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var notice in (List<SAS.Models.Notice>)ViewBag.Notices)
+                    {
+                        <tr>
+                            <td>@notice.Subject</td>
+                            <td>@notice.Message</td>
+                            <td>@notice.Date.ToString("yyyy-MM-dd")</td>
+                            <td>@notice.User?.Name</td>
+                            <td>
+                                <a class="btn btn-sm btn-warning" asp-action="EditNotice" asp-route-id="@notice.NoticeId">Edit</a>
+                                <a class="btn btn-sm btn-danger" asp-action="DeleteNotice" asp-route-id="@notice.NoticeId"
+                                   onclick="return confirm('Are you sure you want to delete this notice?');">Delete</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
 
-            <div id="filteredStudents"></div>
+    <!-- Heading with Add Student -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4>Students</h4>
+        <a class="btn btn-success" asp-action="CreateStudent">Add Student</a>
+    </div>
 
-            <h4>All Students <a asp-action="CreateStudent" class="btn btn-sm btn-success float-end">Add</a></h4>
-            @for (int std = 1; std <= 12; std++)
+    @if (groupedStudents == null || groupedStudents.Count == 0)
+    {
+        <div class="alert alert-info text-center">
+            No students added yet.
+        </div>
+    }
+    else
+    {
+        <!-- Filters -->
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <label>Standard</label>
+                <select id="stdDropdown" class="form-control">
+                    <option value="">-- Select Std --</option>
+                    @foreach (var std in allStds)
+                    {
+                        <option value="@std">Standard @std</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label>Division</label>
+                <select id="divDropdown" class="form-control" disabled>
+                    <option value="">-- Select Div --</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button class="btn btn-primary w-100" onclick="filterStudents()">View Students</button>
+            </div>
+        </div>
+
+        <!-- Student Cards -->
+        <div id="studentSection">
+            @foreach (var stdPair in groupedStudents.OrderBy(s => int.Parse(s.Key)))
             {
-                var stdGroup = Model.Where(s => s.Std == std).GroupBy(s => s.Div.ToUpper()).ToList();
-                if (stdGroup.Any())
-                {
-                    <div class="card mb-3">
-                        <div class="card-header bg-secondary text-white">Standard @std</div>
-                        <div class="card-body p-2">
-                            @foreach (var divGroup in stdGroup)
-                            {
-                                <div class="mb-2">
-                                    <strong>Div @divGroup.Key</strong>
-                                    <ul class="list-group">
-                                        @foreach (var s in divGroup)
-                                        {
-                                            <li class="list-group-item d-flex justify-content-between">
-                                                @s.StudentName
-                                                <span>
-                                                    <a asp-controller="Principal" asp-action="EditStudent" asp-route-email="@s.Email" class="btn btn-sm btn-warning">Edit</a>
-                                                    <a asp-controller="Principal" asp-action="DeleteStudent" asp-route-email="@s.Email" class="btn btn-sm btn-danger">Delete</a>
-                                                </span>
-                                            </li>
-                                        }
-                                    </ul>
-                                </div>
-                            }
-                        </div>
+                var std = stdPair.Key;
+                var divGroups = stdPair.Value;
+
+                <div class="card mb-3 student-card" data-std="@std">
+                    <div class="card-header bg-secondary text-white">Standard @std</div>
+                    <div class="card-body p-2">
+                        @foreach (var divPair in divGroups.OrderBy(d => d.Key))
+                        {
+                            var div = divPair.Key;
+                            var students = divPair.Value;
+
+                            <div class="mb-2 student-div" data-div="@div">
+                                <strong>Div @div</strong>
+                                <ul class="list-group">
+                                    @foreach (var s in students)
+                                    {
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            @s.StudentName
+                                            <span>
+                                                <a asp-action="EditStudent" asp-route-email="@s.Email" class="btn btn-sm btn-warning">Edit</a>
+                                                <a asp-action="DeleteStudent" asp-route-email="@s.Email" class="btn btn-sm btn-danger">Delete</a>
+                                            </span>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        }
                     </div>
-                }
+                </div>
             }
         </div>
-
-        <div class="col-md-6">
-            <h4>Teachers</h4>
-            <ul class="list-group">
-                @foreach (var t in teachers)
-                {
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        @t.Name - ₹@t.Salary
-                        <span>
-                            <button class="btn btn-sm btn-outline-success">Active</button>
-                            <button class="btn btn-sm btn-outline-danger">Inactive</button>
-                        </span>
-                    </li>
-                }
-            </ul>
-        </div>
-    </div>
+    }
 </div>
 
-@await Html.PartialAsync("_BugReportModal", profile)
 
 @section Scripts {
     <script>
-        const grouped = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.GroupedStudents));
+        const groupedStudents = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.GroupedStudents));
 
-        const stdSelect = document.getElementById("stdSelect");
-        const divSelect = document.getElementById("divSelect");
-        const showBtn = document.getElementById("showStudentsBtn");
-        const studentContainer = document.getElementById("filteredStudents");
+        // Populate divisions on standard change
+        document.getElementById('stdDropdown').addEventListener('change', function () {
+            const std = this.value;
+            const divDropdown = document.getElementById('divDropdown');
+            divDropdown.innerHTML = '<option value="">-- Select Div --</option>';
+            divDropdown.disabled = true;
 
-        stdSelect.addEventListener("change", () => {
-            const std = stdSelect.value;
-            divSelect.innerHTML = '<option value="">-- Select Div --</option>';
-
-            if (std && grouped[std]) {
-                const divs = Object.keys(grouped[std]);
+            if (std && groupedStudents[std]) {
+                const divs = Object.keys(groupedStudents[std]);
                 divs.forEach(div => {
-                    const opt = document.createElement("option");
+                    const opt = document.createElement('option');
                     opt.value = div;
-                    opt.textContent = div;
-                    divSelect.appendChild(opt);
+                    opt.textContent = 'Div ' + div;
+                    divDropdown.appendChild(opt);
                 });
-                divSelect.disabled = false;
-            } else {
-                divSelect.disabled = true;
-                showBtn.disabled = true;
+                divDropdown.disabled = false;
             }
         });
 
-        divSelect.addEventListener("change", () => {
-            showBtn.disabled = !divSelect.value;
-        });
+        function filterStudents() {
+            const selectedStd = document.getElementById('stdDropdown').value;
+            const selectedDiv = document.getElementById('divDropdown').value;
 
-        showBtn.addEventListener("click", () => {
-            const std = stdSelect.value;
-            const div = divSelect.value;
+            if (!selectedStd) {
+                alert("Please select at least a Standard.");
+                return;
+            }
 
-            const students = grouped[std]?.[div] ?? [];
-            let html = `<h5>Students of Std ${std} - Div ${div}</h5>`;
-            html += `<ul class="list-group mb-3">`;
-            students.forEach(s => {
-                html += `<li class="list-group-item d-flex justify-content-between">
-                            ${s.StudentName}
-                            <span>
-                                <a class="btn btn-sm btn-warning" href="/Principal/EditStudent?email=${s.Email}">Edit</a>
-                                <a class="btn btn-sm btn-danger" href="/Principal/DeleteStudent?email=${s.Email}">Delete</a>
-                            </span>
-                         </li>`;
+            // Filter logic
+            document.querySelectorAll('.student-card').forEach(card => {
+                const std = card.getAttribute('data-std');
+                if (std === selectedStd) {
+                    card.style.display = '';
+                    card.querySelectorAll('.student-div').forEach(div => {
+                        div.style.display = (selectedDiv === "" || div.getAttribute('data-div') === selectedDiv) ? '' : 'none';
+                    });
+                } else {
+                    card.style.display = 'none';
+                }
             });
-            html += `</ul>`;
-            studentContainer.innerHTML = html;
+        }
+
+        // Hide cards initially
+        window.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.student-card').forEach(card => card.style.display = 'none');
         });
     </script>
 }

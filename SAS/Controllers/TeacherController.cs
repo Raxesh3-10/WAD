@@ -10,11 +10,17 @@ namespace SAS.Controllers
     {
         private readonly IRepository<Student> _studentRepo;
         private readonly IRepository<User> _userRepo;
+        private readonly IRepository<Notice> _noticeRepo; // ✅ Added for notices
 
-        public TeacherController(IRepository<Student> studentRepo, IRepository<User> userRepo)
+        public TeacherController(
+            IRepository<Student> studentRepo,
+            IRepository<User> userRepo,
+            IRepository<Notice> noticeRepo // ✅ Added to constructor
+        )
         {
             _studentRepo = studentRepo;
             _userRepo = userRepo;
+            _noticeRepo = noticeRepo;
         }
 
         public IActionResult Dashboard()
@@ -32,6 +38,13 @@ namespace SAS.Controllers
 
             ViewBag.Profile = GetCurrentUser();
             ViewBag.GroupedStudents = grouped;
+
+            // ✅ Added: All notices for display in dashboard
+            var notices = _noticeRepo.GetAll()
+                .OrderByDescending(n => n.Date)
+                .ToList();
+            ViewBag.Notices = notices;
+
             return View();
         }
 

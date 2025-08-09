@@ -2,11 +2,13 @@
     ViewData["Title"] = "Teacher Dashboard";
     var profile = ViewBag.Profile as SAS.Models.User;
     var groupedStudents = ViewBag.GroupedStudents as Dictionary<string, Dictionary<string, List<SAS.Models.Student>>>;
-
+    var notices = ViewBag.Notices as List<SAS.Models.Notice>;
     var allStds = groupedStudents?.Keys.Select(k => int.Parse(k)).OrderBy(k => k).ToList() ?? new List<int>();
 }
 
 <div class="container mt-4">
+
+    <!-- Profile Card -->
     <div class="card mb-4">
         <div class="card-body">
             <h3 class="text-primary">Welcome, @profile.Name <small class="text-muted">(@profile.Role)</small></h3>
@@ -17,6 +19,36 @@
         </div>
     </div>
 
+    <!-- Notices Section -->
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+            <h4 class="mb-0">Notices</h4>
+        </div>
+        <div class="card-body">
+            @if (notices == null || !notices.Any())
+            {
+                <div class="alert alert-warning mb-0">
+                    No notices available.
+                </div>
+            }
+            else
+            {
+                @foreach (var notice in notices)
+                {
+                    <div class="card mb-3 shadow-sm">
+                        <div class="card-body">
+                            <h4 class="card-title">@notice.User.Name</h4>
+                            <h5 class="card-title">@notice.Subject</h5>
+                            <p class="card-text">@notice.Message</p>
+                            <p class="text-muted mb-0"><small>@notice.Date.ToString("yyyy-MM-dd")</small></p>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+    <!-- Students Section -->
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h4>Students</h4>
         <a class="btn btn-success" asp-action="CreateStudent">Add Student</a>
@@ -95,7 +127,6 @@
     <script>
         const groupedStudents = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.GroupedStudents));
 
-        // Populate Div dropdown on Std change
         document.getElementById('stdDropdown').addEventListener('change', function () {
             const std = this.value;
             const divDropdown = document.getElementById('divDropdown');
@@ -123,13 +154,12 @@
                 return;
             }
 
-            // Show/Hide cards and divisions
             document.querySelectorAll('.student-card').forEach(card => {
                 const std = card.getAttribute('data-std');
                 const matchStd = std === selectedStd;
 
                 if (matchStd) {
-                    card.style.display = ''; // show card
+                    card.style.display = '';
                     card.querySelectorAll('.student-div').forEach(div => {
                         const divValue = div.getAttribute('data-div');
                         div.style.display = (selectedDiv === "" || divValue === selectedDiv) ? '' : 'none';
@@ -140,10 +170,8 @@
             });
         }
 
-        // Optional: Hide all cards initially (for safety)
         window.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.student-card').forEach(card => card.style.display = 'none');
         });
     </script>
 }
-

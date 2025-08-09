@@ -140,20 +140,27 @@ namespace SAS.Controllers
         }
 
         [HttpPost]
-        public IActionResult UpdateProfile(User updated, string otp)
+        public IActionResult UpdateProfile(User updated, string otp, string ConfirmPassword)
         {
             var email = HttpContext.Session.GetString("UserEmail");
-            if (email == null) return RedirectToAction("Login");
-
+            if (email == null)
+                return RedirectToAction("Login");
             if (!OtpHelper.VerifyOtp(HttpContext, email, otp))
             {
                 ViewBag.Error = "Invalid OTP.";
                 return View("Profile", updated);
             }
+            if (updated.Password != ConfirmPassword)
+            {
+                ViewBag.Error = "Passwords do not match.";
+                return View("Profile", updated);
+            }
             _userRepo.Update(email, updated);
             OtpHelper.ClearOtp(HttpContext);
-            return RedirectToAction("Profile");
+
+            return RedirectToAction("Login");
         }
+
 
         // ========== BUG REPORT ==========
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace SAS.Models
@@ -39,6 +40,8 @@ namespace SAS.Models
 
         [Range(0, double.MaxValue, ErrorMessage = "Salary must be non-negative.")]
         public decimal? Salary { get; set; }
+
+        public ICollection<Notice> Notices { get; set; } = new List<Notice>();
 
         public string GetHashedPassword() =>
             BCrypt.Net.BCrypt.HashPassword(Password);
