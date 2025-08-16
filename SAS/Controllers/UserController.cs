@@ -1,199 +1,132 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SAS.Models;
-using SAS.Models.Repositories;
+using SAS.Repositories;
 using SAS.Services;
+using SAS.ViewModels;
+using AutoMapper;
 using System;
 
 namespace SAS.Controllers
 {
+    [ApiController]
+    [Route("api/[controller]")]
     public class UserController : Controller
     {
         private readonly IRepository<User> _userRepo;
         private readonly MailService _mailService;
+        private readonly IMapper _mapper;
 
-        public UserController(IRepository<User> userRepo, MailService mailService)
+        public UserController(IRepository<User> userRepo, MailService mailService, IMapper mapper)
         {
             _userRepo = userRepo;
             _mailService = mailService;
+            _mapper = mapper;
         }
 
-        // ========== LOGIN ==========
-
-        [HttpGet]
-        public IActionResult Login()
+        public IActionResult Login([FromBody] LoginViewModel model)
         {
-            HttpContext.Session.Clear();
-            return View();
-        }
+            var user = _userRepo.GetByEmail(model.Email);
+            if (user == null || !user.VerifyPassword(model.Password))
+                return Unauthorized(new { message = "Invalid credentials" });
 
-        [HttpPost]
-        public IActionResult Login(string email, string password, string role)
-        {
-            var user = _userRepo.GetByEmail(email);
-
-            if (user == null || !user.VerifyPassword(password))
-                return RedirectToAction("Login"); // Skip error
-
-            if (!user.HasRole(Enum.Parse<UserRole>(role, true)))
-                return RedirectToAction("Login"); // Skip error
+            if (!user.HasRole(Enum.Parse<UserRole>(model.Role, true)))
+                return Unauthorized(new { message = "Role mismatch" });
 
             HttpContext.Session.SetString("UserEmail", user.Email);
-            HttpContext.Session.SetString("UserRole", role.ToLower());
+            HttpContext.Session.SetString("UserRole", model.Role.ToLower());
             HttpContext.Session.SetString("UserName", user.Name);
 
-            return role.ToLower() switch
-            {
-                "teacher" => RedirectToAction("Dashboard", "Teacher"),
-                "principal" => RedirectToAction("Dashboard", "Principal"),
-                "trustee" => RedirectToAction("Dashboard", "Trustee"),
-                _ => RedirectToAction("Login")
-            };
+            return Ok(new { message = "Login successful", role = model.Role.ToLower() });
         }
 
-
-        // ========== SIGNUP + OTP ==========
-
-        [HttpGet]
-        public IActionResult Signup()
+        public IActionResult Signup([FromBody] UserViewModel userVm, string otp)
         {
-            return View();
-        }
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        [HttpPost]
-        public IActionResult Signup(User user, string otp)
-        {
-            if (!ModelState.IsValid)
-                return View(user);
+            if (!OtpHelper.VerifyOtp(HttpContext, userVm.Email, otp))
+                return BadRequest(new { message = "Invalid or expired OTP" });
 
-            if (!OtpHelper.VerifyOtp(HttpContext, user.Email, otp))
-            {
-                ViewBag.Error = "Invalid or expired OTP.";
-                return View(user);
-            }
-
-            var role = user.Role.ToString().ToLower();
-            if (role == "teacher" || role == "principal")
-            {
-                // Read extra fields manually
-                 int.TryParse(Request.Form["Std"], out int std);
-                var div = Request.Form["Div"];
-                var salary = Request.Form["Salary"];
-
-                // Attach to user object
-                user.Std = std;
-                user.Div = div;
-                if (decimal.TryParse(salary, out decimal sal))
-                    user.Salary = sal;
-            }
+            var user = _mapper.Map<User>(userVm);
             _userRepo.Add(user);
             OtpHelper.ClearOtp(HttpContext);
-            return RedirectToAction("Login");
+
+            return Ok(new { message = "User created successfully", user = _mapper.Map<UserViewModel>(user) });
         }
 
-
-        [HttpPost]
-        public IActionResult SendOtp(string email)
+        public IActionResult SendOtp([FromBody] string email)
         {
             if (string.IsNullOrWhiteSpace(email))
-                return Json(new { success = false, message = "Email required" });
+                return BadRequest(new { message = "Email required" });
 
             string otp = OtpHelper.GenerateOtp();
             OtpHelper.StoreOtp(HttpContext, email, otp);
             _mailService.SendOtp(email, otp);
-            return Json(new { success = true, message = "OTP sent" });
+
+            return Ok(new { message = "OTP sent" });
         }
 
-        // ========== SESSION ==========
-
-        [HttpGet]
         public IActionResult CheckSession()
         {
             var email = HttpContext.Session.GetString("UserEmail");
             var role = HttpContext.Session.GetString("UserRole");
-            if (email == null || role == null)
-                return Json(new { success = false });
 
-            return Json(new { success = true, email, role });
+            if (email == null || role == null)
+                return Ok(new { success = false });
+
+            return Ok(new { success = true, email, role });
         }
 
-        [HttpPost]
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
-            return RedirectToAction("Login");
+            return Ok(new { message = "Logged out" });
         }
 
-        // ========== PROFILE ==========
-
-        [HttpGet]
         public IActionResult Profile()
         {
             var email = HttpContext.Session.GetString("UserEmail");
-            if (email == null)
-                return RedirectToAction("Login");
+            if (email == null) return Unauthorized();
 
             var user = _userRepo.GetByEmail(email);
             if (user == null) return NotFound();
 
-            return View(user);
+            var userVm = _mapper.Map<UserViewModel>(user);
+            return Ok(userVm);
         }
 
-        [HttpPost]
-        public IActionResult UpdateProfile(User updated, string otp, string ConfirmPassword)
+        public IActionResult UpdateProfile([FromBody] UserViewModel updatedVm, string otp, string confirmPassword)
         {
             var email = HttpContext.Session.GetString("UserEmail");
-            if (email == null)
-                return RedirectToAction("Login");
+            if (email == null) return Unauthorized();
+
             if (!OtpHelper.VerifyOtp(HttpContext, email, otp))
-            {
-                ViewBag.Error = "Invalid OTP.";
-                return View("Profile", updated);
-            }
-            if (updated.Password != ConfirmPassword)
-            {
-                ViewBag.Error = "Passwords do not match.";
-                return View("Profile", updated);
-            }
-            _userRepo.Update(email, updated);
+                return BadRequest(new { message = "Invalid OTP" });
+
+            if (updatedVm.Password != confirmPassword)
+                return BadRequest(new { message = "Passwords do not match" });
+
+            var updatedUser = _mapper.Map<User>(updatedVm);
+            _userRepo.Update(email, updatedUser);
             OtpHelper.ClearOtp(HttpContext);
 
-            return RedirectToAction("Login");
+            return Ok(new { message = "Profile updated successfully", user = updatedVm });
         }
 
-
-        // ========== BUG REPORT ==========
-
-        [HttpGet]
-        public IActionResult ReportBug()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        public IActionResult ReportBug(BugReportViewModel model)
+        public IActionResult ReportBug([FromBody] BugReportViewModel model)
         {
             if (!ModelState.IsValid)
-            {
-                ViewBag.Status = "Invalid input.";
-                ViewBag.StatusClass = "danger";
-                return View(model);
-            }
+                return BadRequest(new { message = "Invalid input" });
 
             try
             {
                 _mailService.ReportBug(model.Name, model.Email, model.Message);
-                ViewBag.Status = "Bug report sent successfully.";
-                ViewBag.StatusClass = "success";
+                return Ok(new { message = "Bug report sent successfully" });
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ViewBag.Status = "Failed to send bug report. Please try again.";
-                ViewBag.StatusClass = "danger";
+                return StatusCode(500, new { message = "Failed to send bug report" });
             }
-
-            return View(model);
         }
-
     }
 }

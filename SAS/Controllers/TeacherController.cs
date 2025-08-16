@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SAS.Models;
-using SAS.Models.Repositories;
+using SAS.Repositories;
+using SAS.ViewModels;
+using AutoMapper;
 using System.Linq;
 
 namespace SAS.Controllers
@@ -10,22 +12,25 @@ namespace SAS.Controllers
     {
         private readonly IRepository<Student> _studentRepo;
         private readonly IRepository<User> _userRepo;
-        private readonly IRepository<Notice> _noticeRepo; // ✅ Added for notices
+        private readonly IRepository<Notice> _noticeRepo;
+        private readonly IMapper _mapper;
 
         public TeacherController(
             IRepository<Student> studentRepo,
             IRepository<User> userRepo,
-            IRepository<Notice> noticeRepo // ✅ Added to constructor
+            IRepository<Notice> noticeRepo,
+            IMapper mapper
         )
         {
             _studentRepo = studentRepo;
             _userRepo = userRepo;
             _noticeRepo = noticeRepo;
+            _mapper = mapper;
         }
 
         public IActionResult Dashboard()
         {
-            if (!IsAuthorized("teacher")) return RedirectToAction("Login", "User");
+            if (!IsAuthorized("teacher")) return Unauthorized();
 
             var students = _studentRepo.GetAll();
             var grouped = students
@@ -33,72 +38,30 @@ namespace SAS.Controllers
                 .ToDictionary(
                     g => g.Key.ToString(),
                     g => g.GroupBy(s => s.Div.ToUpper())
-                          .ToDictionary(d => d.Key, d => d.ToList())
+                          .ToDictionary(d => d.Key, d => _mapper.Map<StudentViewModel[]>(d.ToList()))
                 );
 
-            ViewBag.Profile = GetCurrentUser();
-            ViewBag.GroupedStudents = grouped;
-
-            // ✅ Added: All notices for display in dashboard
             var notices = _noticeRepo.GetAll()
                 .OrderByDescending(n => n.Date)
+                .Select(n => _mapper.Map<NoticeViewModel>(n))
                 .ToList();
-            ViewBag.Notices = notices;
 
-            return View();
-        }
+            var profile = _mapper.Map<UserViewModel>(GetCurrentUser());
 
-        public IActionResult CreateStudent()
-        {
-            if (!IsAuthorized("teacher")) return RedirectToAction("Login", "User");
-            return View();
-        }
-
-        [HttpPost]
-        public IActionResult CreateStudent(Student student)
-        {
-            if (!IsAuthorized("teacher")) return RedirectToAction("Login", "User");
-
-            if (!ModelState.IsValid) return View(student);
-            _studentRepo.Add(student);
-            return RedirectToAction("Dashboard");
-        }
-
-        public IActionResult EditStudent(string email)
-        {
-            if (!IsAuthorized("teacher")) return RedirectToAction("Login", "User");
-
-            var student = _studentRepo.GetByEmail(email);
-            if (student == null)
-                return NotFound();
-            else
-                return View(student);
-        }
-
-        [HttpPost]
-        public IActionResult EditStudent(string email, Student updated)
-        {
-            if (!IsAuthorized("teacher")) return RedirectToAction("Login", "User");
-
-            if (!ModelState.IsValid) return View(updated);
-            _studentRepo.Update(email, updated);
-            return RedirectToAction("Dashboard");
-        }
-
-        public IActionResult DeleteStudent(string email)
-        {
-            if (!IsAuthorized("teacher")) return RedirectToAction("Login", "User");
-
-            _studentRepo.Delete(email);
-            return RedirectToAction("Dashboard");
+            return Ok(new
+            {
+                Profile = profile,
+                GroupedStudents = grouped,
+                Notices = notices
+            });
         }
 
         public IActionResult Profile()
         {
-            if (!IsAuthorized("teacher")) return RedirectToAction("Login", "User");
+            if (!IsAuthorized("teacher")) return Unauthorized();
 
-            var user = GetCurrentUser();
-            return View(user);
+            var profile = _mapper.Map<UserViewModel>(GetCurrentUser());
+            return Ok(profile);
         }
 
         private bool IsAuthorized(string role) =>

@@ -1,9 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace SAS.Models
 {
-
     public class Notice
     {
         [Key]

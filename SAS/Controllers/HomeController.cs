@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using SAS.Models;
+using SAS.ViewModels;
 using System.Diagnostics;
 
 namespace SAS.Controllers
@@ -23,6 +23,7 @@ namespace SAS.Controllers
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
+            HttpContext.Session.Clear();
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
     }

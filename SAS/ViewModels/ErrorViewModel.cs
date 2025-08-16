@@ -1,6 +1,6 @@
 using System;
 
-namespace SAS.Models
+namespace SAS.ViewModels
 {
     public class ErrorViewModel
     {

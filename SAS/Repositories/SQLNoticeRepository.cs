@@ -4,7 +4,7 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using SAS.Models;
 
-namespace SAS.Models.Repositories
+namespace SAS.Repositories
 {
     public class SQLNoticeRepository : IRepository<Notice>
     {

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace SAS.Models.Repositories
+namespace SAS.Repositories
 {
     public interface IRepository<T> where T : class
     {

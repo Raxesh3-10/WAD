@@ -5,10 +5,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using SAS.Models.Repositories;
 using SAS.Models;
 using SAS.Services;
 using System;
+using SAS.Repositories;
+using CloudinaryDotNet;
+using SAS.Config;
+using AutoMapper;
+using SAS.Mappers;
 
 namespace SAS
 {
@@ -24,6 +28,22 @@ namespace SAS
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Bind Cloudinary settings from appsettings.json
+            var cloudinarySettings = Configuration.GetSection("Cloudinary").Get<CloudinarySettings>();
+
+            var account = new Account(
+                cloudinarySettings.CloudName,
+                cloudinarySettings.ApiKey,
+                cloudinarySettings.ApiSecret
+            );
+
+            var cloudinary = new Cloudinary(account);
+
+            // Register as singleton
+            services.AddSingleton(cloudinary);
+
+            services.AddAutoMapper(typeof(Helper));
+
             // Enable MVC
             services.AddControllersWithViews();
 
@@ -35,6 +55,7 @@ namespace SAS
             services.AddScoped<IRepository<Student>, SQLStudentRepository>();
             services.AddScoped<IRepository<User>, SQLUserRepository>();
             services.AddScoped<IRepository<Notice>, SQLNoticeRepository>();
+            services.AddScoped<IUserDetailsRepository,SQLUserDetailsRepository>();
 
             // Email service
             services.AddTransient<MailService>();

@@ -3,7 +3,7 @@ using System.Linq;
 using SAS.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace SAS.Models.Repositories
+namespace SAS.Repositories
 {
     public class SQLUserRepository : IRepository<User>
     {

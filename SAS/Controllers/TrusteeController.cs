@@ -1,9 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SAS.Models;
-using SAS.Models.Repositories;
+using SAS.Repositories;
+using SAS.ViewModels;
+using AutoMapper;
 using System.Linq;
-using System;
 
 namespace SAS.Controllers
 {
@@ -11,102 +12,54 @@ namespace SAS.Controllers
     {
         private readonly IRepository<User> _userRepo;
         private readonly IRepository<Notice> _noticeRepo;
+        private readonly IMapper _mapper;
 
-        public TrusteeController(IRepository<User> userRepo, IRepository<Notice> noticeRepo)
+        public TrusteeController(
+            IRepository<User> userRepo,
+            IRepository<Notice> noticeRepo,
+            IMapper mapper
+        )
         {
             _userRepo = userRepo;
             _noticeRepo = noticeRepo;
+            _mapper = mapper;
         }
 
         public IActionResult Dashboard()
         {
-            if (!IsAuthorized("trustee")) return RedirectToAction("Login", "User");
+            if (!IsAuthorized("trustee")) return Unauthorized();
 
             var allUsers = _userRepo.GetAll();
-            var teachers = allUsers.Where(u => u.Role == UserRole.Teacher).ToList();
-            var principals = allUsers.Where(u => u.Role == UserRole.Principal).ToList();
+            var teachers = allUsers
+                .Where(u => u.Role == UserRole.Teacher)
+                .Select(u => _mapper.Map<UserViewModel>(u))
+                .ToList();
+            var principals = allUsers
+                .Where(u => u.Role == UserRole.Principal)
+                .Select(u => _mapper.Map<UserViewModel>(u))
+                .ToList();
 
-            ViewBag.Teachers = teachers;
-            ViewBag.Principals = principals;
-            ViewBag.Profile = GetCurrentUser();
+            var notices = _noticeRepo.GetAll()
+                .OrderByDescending(n => n.Date)
+                .Select(n => _mapper.Map<NoticeViewModel>(n))
+                .ToList();
 
-            // Load all notices
-            var notices = _noticeRepo.GetAll();
-            ViewBag.Notices = notices;
+            var profile = _mapper.Map<UserViewModel>(GetCurrentUser());
 
-            return View();
+            return Ok(new
+            {
+                Profile = profile,
+                Teachers = teachers,
+                Principals = principals,
+                Notices = notices
+            });
         }
-
         public IActionResult Profile()
         {
-            if (!IsAuthorized("trustee")) return RedirectToAction("Login", "User");
+            if (!IsAuthorized("trustee")) return Unauthorized();
 
-            var user = GetCurrentUser();
-            return View(user);
-        }
-
-        public IActionResult CreateNotice()
-        {
-            if (!IsAuthorized("trustee")) return RedirectToAction("Login", "User");
-            return View(new Notice { Date = DateTime.Now });
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult CreateNotice(Notice notice)
-        {
-            if (!IsAuthorized("trustee")) return RedirectToAction("Login", "User");
-
-            var currentUser = GetCurrentUser();
-            if (currentUser == null)
-                return Unauthorized();
-
-            if (ModelState.IsValid)
-            {
-                notice.UserId = currentUser.Id;
-                _noticeRepo.Add(notice);
-                return RedirectToAction(nameof(Dashboard));
-            }
-
-            return View(notice);
-        }
-
-        public IActionResult EditNotice(int id)
-        {
-            if (!IsAuthorized("trustee")) return RedirectToAction("Login", "User");
-
-            var notice = _noticeRepo.GetAll().FirstOrDefault(n => n.NoticeId == id);
-            if (notice == null) return NotFound();
-
-            return View(notice);
-        }
-
-        [HttpPost]
-        public IActionResult EditNotice(Notice notice)
-        {
-            if (!IsAuthorized("trustee")) return RedirectToAction("Login", "User");
-
-            var currentUser = GetCurrentUser();
-            if (currentUser == null) return Unauthorized();
-
-            if (ModelState.IsValid)
-            {
-                _noticeRepo.Update(currentUser.Email, notice);
-                return RedirectToAction(nameof(Dashboard));
-            }
-
-            return View(notice);
-        }
-
-        [HttpPost]
-        public IActionResult DeleteNotice(int id)
-        {
-            if (!IsAuthorized("trustee")) return RedirectToAction("Login", "User");
-
-            var deleted = (_noticeRepo as SQLNoticeRepository)?.DeleteById(id) ?? false;
-            if (!deleted) return NotFound();
-
-            return RedirectToAction(nameof(Dashboard));
+            var profile = _mapper.Map<UserViewModel>(GetCurrentUser());
+            return Ok(profile);
         }
 
         private bool IsAuthorized(string role) =>

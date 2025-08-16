@@ -1,0 +1,143 @@
+﻿@model SAS.ViewModels.UserDetailsViewModel
+@{
+    ViewData["Title"] = "User Details";
+
+    bool editMode = ViewData["EditMode"] as bool? ?? false;
+}
+
+<h3>User Details</h3>
+
+@if (ViewBag.StatusMsg != null)
+
+{
+    <p>@ViewBag.StatusMsg</p>
+}
+
+@if (Model != null)
+
+{
+    @if (!editMode)
+
+    {
+        <div class="card p-3">
+            <p><strong>Subjects:</strong> @(Model.Subjects?.Any() == true ? string.Join(", ", Model.Subjects) : "—")</p>
+            <p><strong>Standards:</strong> @(Model.Std?.Any() == true ? string.Join(", ", Model.Std) : "—")</p>
+            <p><strong>Salary:</strong> @Model.Salary</p>
+            <p><strong>Date of Birth:</strong> @Model.Dob.ToString("yyyy-MM-dd")</p>
+            <p><strong>Photo:</strong></p>
+            @if (!string.IsNullOrEmpty(Model.Photo))
+
+            {
+                <img src="@Model.Photo" style="width:120px;height:150px;object-fit:cover;border:1px solid #ccc;" />
+            }
+
+            else
+
+            {
+                <p>—</p>
+            }
+            <p><strong>Qualifications:</strong> @(Model.Qualifications?.Any() == true ? string.Join(", ", Model.Qualifications) : "—")</p>
+            <p><strong>Experience:</strong> @Model.Experience years</p>
+            <p><strong>Joining Date:</strong> @Model.JoiningDate.ToString("yyyy-MM-dd")</p>
+            <p><strong>Address:</strong> @Model.Address</p>
+            <p><strong>Phone:</strong> @Model.Phone</p>
+            <p><strong>Documents:</strong></p>
+            @if (Model.Documents?.Any() == true)
+
+            {
+                <ul>
+                    @foreach (var doc in Model.Documents)
+
+                    {
+                        <li>
+                            <a href="@doc" target="_blank">@doc.EndsWith(".pdf") ? "📄 PDF Document" : "🖼️ Image"</a>
+                        </li>
+                    }
+                </ul>
+            }
+
+            else
+
+            {
+                <p>—</p>
+            }
+
+            <form method="post" asp-action="ToggleEdit">
+                <button type="submit" class="btn btn-warning mt-3">Edit</button>
+            </form>
+        </div>
+    }
+
+    else
+
+    {
+        <form method="post" enctype="multipart/form-data" asp-action="UpdateDetails">
+            <div class="card p-3">
+                <label>Subjects (comma separated)</label>
+                <input type="text" name="SubjectsText" class="form-control" value="@string.Join(", ", Model.Subjects ?? new List<string>())" />
+
+                <label>Standards (comma separated)</label>
+                <input type="text" name="StdText" class="form-control" value="@string.Join(", ", Model.Std ?? new List<int>())" />
+
+                <label>Salary</label>
+                <input type="number" name="Salary" class="form-control" value="@Model.Salary" />
+
+                <label>Date of Birth</label>
+                <input type="date" name="Dob" class="form-control" value="@Model.Dob.ToString("yyyy-MM-dd")" />
+
+                <label>Qualifications</label>
+                <input type="text" name="QualificationsText" class="form-control" value="@string.Join(", ", Model.Qualifications ?? new List<string>())" />
+
+                <label>Experience (years)</label>
+                <input type="number" name="Experience" class="form-control" value="@Model.Experience" />
+
+                <label>Joining Date</label>
+                <input type="date" name="JoiningDate" class="form-control" value="@Model.JoiningDate.ToString("yyyy-MM-dd")" />
+
+                <label>Address</label>
+                <input type="text" name="Address" class="form-control" value="@Model.Address" />
+
+                <label>Phone</label>
+                <input type="text" name="Phone" class="form-control" value="@Model.Phone" />
+
+                <label>Photo</label>
+                <input type="file" name="Photo" class="form-control" accept="image/*" />
+                @if (!string.IsNullOrEmpty(Model.Photo))
+
+                {
+                    <p>Current: <a href="@Model.Photo" target="_blank">View</a></p>
+                }
+
+                <label>Documents</label>
+                <input type="file" name="Documents" class="form-control" accept=".pdf,image/*" multiple />
+
+                @if (Model.Documents?.Any() == true)
+
+                {
+                    <strong>Existing Documents:</strong>
+                    <ul>
+                        @for (int i = 0; i < Model.Documents.Count; i++)
+
+                        {
+                            <li>
+                                <a href="@Model.Documents[i]" target="_blank">@Model.Documents[i].EndsWith(".pdf") ? "📄 PDF Document" : "🖼️ Image"</a>
+                                <input type="checkbox" name="RemoveDocIndexes" value="@i" /> Remove
+                            </li>
+                        }
+                    </ul>
+                }
+
+                <div class="mt-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-success">Save</button>
+                    <a asp-action="ToggleEdit" class="btn btn-secondary">Cancel</a>
+                </div>
+            </div>
+        </form>
+    }
+}
+
+else
+
+{
+    <p>No details found.</p>
+}

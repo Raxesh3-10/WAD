@@ -38,7 +38,6 @@ namespace SAS.Models
         [Range(1000000000, 9999999999, ErrorMessage = "Phone number must be 10 digits and cannot start with 0.")]
         public long PhoneNo { get; set; }
 
-        // Optional: Constructor with validation logic if you're not using model binding
         public Student() { }
 
         public Student(string studentName, string fatherName, string motherName, string email,

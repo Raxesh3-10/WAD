@@ -1,4 +1,4 @@
-﻿namespace SAS.Models
+﻿namespace SAS.ViewModels
 {
     public class BugReportViewModel
     {

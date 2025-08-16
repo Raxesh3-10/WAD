@@ -13,9 +13,11 @@ namespace SAS.Models
 
     public class User
     {
+        [Key]
         public int Id { get; set; }
 
         [Required(ErrorMessage = "Name is required.")]
+        [StringLength(100)]
         public string Name { get; set; }
 
         [Required(ErrorMessage = "Email is required.")]
@@ -29,19 +31,9 @@ namespace SAS.Models
         [Required(ErrorMessage = "User role is required.")]
         public UserRole Role { get; set; }
 
-        [Display(Name = "Subject")]
-        public string? Subject { get; set; }
-
-        [Range(1, 12, ErrorMessage = "Standard must be between 1 and 12.")]
-        public int? Std { get; set; }
-
-        [RegularExpression(@"^[A-Z]$", ErrorMessage = "Division must be a single uppercase letter (e.g. A, B, C).")]
-        public string? Div { get; set; }
-
-        [Range(0, double.MaxValue, ErrorMessage = "Salary must be non-negative.")]
-        public decimal? Salary { get; set; }
-
         public ICollection<Notice> Notices { get; set; } = new List<Notice>();
+
+        public UserDetails UserDetails { get; set; }
 
         public string GetHashedPassword() =>
             BCrypt.Net.BCrypt.HashPassword(Password);
@@ -54,20 +46,6 @@ namespace SAS.Models
 
         public object GetProfile()
         {
-            if (Role == UserRole.Teacher || Role == UserRole.Principal)
-            {
-                return new
-                {
-                    Name,
-                    Email,
-                    Role,
-                    Subject,
-                    Std,
-                    Div,
-                    Salary
-                };
-            }
-
             return new
             {
                 Name,
