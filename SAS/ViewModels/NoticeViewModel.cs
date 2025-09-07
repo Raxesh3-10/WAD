@@ -5,7 +5,7 @@ namespace SAS.ViewModels
 {
     public class NoticeViewModel
     {
-        public int NoticeId { get; set; }  // Needed for Edit form (hidden input)
+        public Guid NoticeId { get; set; }  // Needed for Edit form (hidden input)
 
         [Required(ErrorMessage = "'Subject' is required.")]
         [StringLength(200)]
@@ -18,6 +18,6 @@ namespace SAS.ViewModels
         [DataType(DataType.Date)]
         public DateTime Date { get; set; }
 
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
     }
 }

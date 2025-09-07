@@ -1,0 +1,31 @@
+﻿@model List<SAS.ViewModels.NoticeViewModel>
+
+<div class="card mb-4 shadow-sm">
+    <div class="card-body">
+        <h4 class="card-title">Notices</h4>
+
+        @if (Model == null || !Model.Any())
+
+        {
+            <p class="text-muted">No notices available.</p>
+        }
+
+        else
+
+        {
+            <ul class="list-group">
+                @foreach (var n in Model)
+
+                {
+                    <li class="list-group-item">
+                        <div>
+                            <strong>@n.Subject</strong><br />
+                            <span>@n.Message</span><br />
+                            <small>Date: @n.Date.ToShortDateString()</small>
+                        </div>
+                    </li>
+                }
+            </ul>
+        }
+    </div>
+</div>

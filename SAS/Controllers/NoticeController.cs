@@ -4,6 +4,7 @@ using SAS.Models;
 using SAS.Repositories;
 using SAS.ViewModels;
 using AutoMapper;
+using System;
 using System.Linq;
 
 namespace SAS.Controllers
@@ -21,70 +22,99 @@ namespace SAS.Controllers
             _mapper = mapper;
         }
 
-        public IActionResult CreateNotice([FromBody] NoticeViewModel noticeVm)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult CreateNotice(NoticeViewModel noticeVm)
         {
-            if (!IsAuthorized("principal")) return Unauthorized();
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!IsAuthorized("principal", "trustee")) return Unauthorized();
+            if (!ModelState.IsValid) return ViewComponent("Notice");
 
             var currentUser = GetCurrentUser();
             if (currentUser == null) return Unauthorized();
 
             var notice = _mapper.Map<Notice>(noticeVm);
+            notice.NoticeId = Guid.NewGuid();
             notice.UserId = currentUser.Id;
 
             _noticeRepo.Add(notice);
 
-            var resultVm = _mapper.Map<NoticeViewModel>(notice);
-            return Ok(new { message = "Notice created successfully", notice = resultVm });
+            TempData["SuccessMessage"] = "Notice created successfully.";
+            return RedirectToAction("Dashboard", "Principal");
         }
 
-        public IActionResult EditNotice(int id, [FromBody] NoticeViewModel noticeVm)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult EditNotice(NoticeViewModel noticeVm)
         {
-            if (!IsAuthorized("principal")) return Unauthorized();
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!IsAuthorized("principal", "trustee")) return Unauthorized();
+            if (!ModelState.IsValid) return ViewComponent("Notice");
 
             var currentUser = GetCurrentUser();
             if (currentUser == null) return Unauthorized();
 
-            var updatedNotice = _mapper.Map<Notice>(noticeVm);
-            updatedNotice.NoticeId = id;
-            updatedNotice.UserId = currentUser.Id;
+            var existing = _noticeRepo.GetAll().FirstOrDefault(n => n.NoticeId == noticeVm.NoticeId);
+            if (existing == null) return NotFound();
 
-            var success = _noticeRepo.Update(currentUser.Email, updatedNotice);
-            if (!success) return NotFound(new { message = "Notice not found" });
+            // Update fields individually
+            existing.Subject = noticeVm.Subject;
+            existing.Message = noticeVm.Message;
+            existing.Date = noticeVm.Date;
+            existing.UserId = currentUser.Id;
 
-            var resultVm = _mapper.Map<NoticeViewModel>(updatedNotice);
-            return Ok(new { message = "Notice updated successfully", notice = resultVm });
+            _noticeRepo.Update(existing.User.Email, existing);
+
+            TempData["SuccessMessage"] = "Notice updated successfully.";
+            return RedirectToAction("Dashboard", "Principal");
         }
 
-        public IActionResult DeleteNotice(int id)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteNotice(Guid id)
         {
-            if (!IsAuthorized("principal")) return Unauthorized();
+            if (!IsAuthorized("principal", "trustee")) return Unauthorized();
 
-            var success = (_noticeRepo as SQLNoticeRepository)?.DeleteById(id) ?? false;
-            if (!success) return NotFound(new { message = "Notice not found" });
+            var existing = _noticeRepo.GetAll().FirstOrDefault(n => n.NoticeId == id);
+            if (existing == null) return NotFound();
 
-            return Ok(new { message = "Notice deleted successfully" });
+            _noticeRepo.Delete(existing.User.Email);
+
+            TempData["SuccessMessage"] = "Notice deleted successfully.";
+            return RedirectToAction("Dashboard", "Principal");
         }
 
-        public IActionResult GetNotice(int id)
+        [HttpGet]
+        public IActionResult GetNotice(Guid id)
         {
-            if (!IsAuthorized("principal")) return Unauthorized();
+            if (!IsAuthorized("teacher", "staff", "principal", "trustee")) return Unauthorized();
 
             var notice = _noticeRepo.GetAll().FirstOrDefault(n => n.NoticeId == id);
-            if (notice == null) return NotFound(new { message = "Notice not found" });
+            if (notice == null) return NotFound();
 
-            var noticeVm = _mapper.Map<NoticeViewModel>(notice);
-            return Ok(noticeVm);
+            var vm = _mapper.Map<NoticeViewModel>(notice);
+            return View(vm);
         }
 
-        private bool IsAuthorized(string role) =>
-            HttpContext.Session.GetString("UserRole") == role;
+        [HttpGet]
+        public IActionResult GetAllNotices()
+        {
+            if (!IsAuthorized("teacher", "staff", "principal", "trustee")) return Unauthorized();
+
+            var notices = _noticeRepo.GetAll().ToList();
+            var vms = notices.Select(n => _mapper.Map<NoticeViewModel>(n)).ToList();
+
+            return View(vms);
+        }
+
+        private bool IsAuthorized(params string[] roles)
+        {
+            var role = HttpContext.Session.GetString("UserRole");
+            return roles.Contains(role?.ToLower());
+        }
 
         private User? GetCurrentUser()
         {
             var email = HttpContext.Session.GetString("UserEmail");
-            return _userRepo.GetByEmail(email ?? "");
+            return string.IsNullOrEmpty(email) ? null : _userRepo.GetByEmail(email);
         }
     }
 }

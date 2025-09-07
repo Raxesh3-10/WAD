@@ -1,0 +1,70 @@
+﻿@model List<SAS.ViewModels.NoticeViewModel>
+
+<div class="card mb-4 shadow-sm" id="notice-component">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="card-title">Notices</h4>
+        </div>
+
+        <!-- Create Notice Form -->
+        <div class="mb-4">
+            @await Html.PartialAsync("_CreateNotice", new SAS.ViewModels.NoticeViewModel())
+        </div>
+
+        <!-- Notices List -->
+        @if (Model == null || !Model.Any())
+
+        {
+            <p class="text-muted">No notices available.</p>
+        }
+
+        else
+
+        {
+            <ul class="list-group">
+                @foreach (var n in Model)
+
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <div>
+                            <strong>@n.Subject</strong><br />
+                            <span>@n.Message</span><br />
+                            <small>Date: @n.Date.ToShortDateString()</small>
+                        </div>
+                        <div>
+                            <!-- Edit Button -->
+                            <button type="button" class="btn btn-sm btn-outline-primary me-2"
+                                    onclick="showEditForm('@n.NoticeId', '@n.Subject', '@n.Message', '@n.Date.ToString("yyyy-MM-dd")')">
+                                Edit
+                            </button>
+
+                            <!-- Delete Form -->
+                            <form asp-action="DeleteNotice" asp-controller="Notice" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@n.NoticeId" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                            </form>
+                        </div>
+                    </li>
+                }
+            </ul>
+        }
+
+        <!-- Edit Notice Form (hidden initially) -->
+        <div id="editNoticeFormContainer" style="display:none;" class="mt-4">
+            @await Html.PartialAsync("_EditNotice", new SAS.ViewModels.NoticeViewModel())
+        </div>
+    </div>
+</div>
+
+<script>
+        function showEditForm(id, subject, message, date) {
+        document.querySelector('#editNoticeFormContainer input[name="NoticeId"]').value = id;
+        document.querySelector('#editNoticeFormContainer input[name="Subject"]').value = subject;
+        document.querySelector('#editNoticeFormContainer textarea[name="Message"]').value = message;
+        document.querySelector('#editNoticeFormContainer input[name="Date"]').value = date;
+
+    document.getElementById('editNoticeFormContainer').style.display = 'block';
+    document.getElementById('editNoticeFormContainer').scrollIntoView({ behavior: 'smooth' });
+    }
+</script>

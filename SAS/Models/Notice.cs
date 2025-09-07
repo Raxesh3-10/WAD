@@ -6,7 +6,7 @@ namespace SAS.Models
     public class Notice
     {
         [Key]
-        public int NoticeId { get; set; }
+        public Guid NoticeId { get; set; }
 
         [Required(ErrorMessage = "'Subject' is required.")]
         [StringLength(200)]
@@ -19,7 +19,7 @@ namespace SAS.Models
         [DataType(DataType.Date)]
         public DateTime Date { get; set; }
 
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
 
         public User User { get; set; }
     }

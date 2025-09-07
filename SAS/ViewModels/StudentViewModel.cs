@@ -1,10 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace SAS.ViewModels
 {
     public class StudentViewModel
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [Required(ErrorMessage = "Student name is required.")]
         public string StudentName { get; set; }

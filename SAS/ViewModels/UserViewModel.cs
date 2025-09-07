@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace SAS.ViewModels
 {
     public class UserViewModel
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [Required(ErrorMessage = "Name is required.")]
         [StringLength(100)]

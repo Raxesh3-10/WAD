@@ -11,17 +11,17 @@ namespace SAS.Controllers
     public class TrusteeController : Controller
     {
         private readonly IRepository<User> _userRepo;
-        private readonly IRepository<Notice> _noticeRepo;
+        private readonly IUserDetailsRepository _userDetailsRepo;
         private readonly IMapper _mapper;
 
         public TrusteeController(
             IRepository<User> userRepo,
-            IRepository<Notice> noticeRepo,
+            IUserDetailsRepository userDetailsRepo,
             IMapper mapper
         )
         {
             _userRepo = userRepo;
-            _noticeRepo = noticeRepo;
+            _userDetailsRepo = userDetailsRepo;
             _mapper = mapper;
         }
 
@@ -29,37 +29,18 @@ namespace SAS.Controllers
         {
             if (!IsAuthorized("trustee")) return Unauthorized();
 
-            var allUsers = _userRepo.GetAll();
-            var teachers = allUsers
-                .Where(u => u.Role == UserRole.Teacher)
-                .Select(u => _mapper.Map<UserViewModel>(u))
-                .ToList();
-            var principals = allUsers
-                .Where(u => u.Role == UserRole.Principal)
-                .Select(u => _mapper.Map<UserViewModel>(u))
-                .ToList();
+            var currentUser = GetCurrentUser();
+            ViewBag.Profile = _mapper.Map<UserViewModel>(currentUser);
 
-            var notices = _noticeRepo.GetAll()
-                .OrderByDescending(n => n.Date)
-                .Select(n => _mapper.Map<NoticeViewModel>(n))
-                .ToList();
+            var teachers = _userRepo.GetAll().Where(u => u.Role == UserRole.Teacher).ToList();
+            var principals = _userRepo.GetAll().Where(u => u.Role == UserRole.Principal).ToList();
+            var staffs = _userRepo.GetAll().Where(u => u.Role == UserRole.Staff).ToList();
 
-            var profile = _mapper.Map<UserViewModel>(GetCurrentUser());
+            ViewBag.Teachers = teachers.Select(t => BuildUserDetailsVM(t)).ToList();
+            ViewBag.Principals = principals.Select(p => BuildUserDetailsVM(p)).ToList();
+            ViewBag.Staffs = staffs.Select(s => BuildUserDetailsVM(s)).ToList();
 
-            return Ok(new
-            {
-                Profile = profile,
-                Teachers = teachers,
-                Principals = principals,
-                Notices = notices
-            });
-        }
-        public IActionResult Profile()
-        {
-            if (!IsAuthorized("trustee")) return Unauthorized();
-
-            var profile = _mapper.Map<UserViewModel>(GetCurrentUser());
-            return Ok(profile);
+            return View();
         }
 
         private bool IsAuthorized(string role) =>
@@ -69,6 +50,19 @@ namespace SAS.Controllers
         {
             var email = HttpContext.Session.GetString("UserEmail");
             return _userRepo.GetByEmail(email ?? "");
+        }
+
+        private DetailsViewModel BuildUserDetailsVM(User user)
+        {
+            var userDetails = _userDetailsRepo.GetByUserId(user.Id);
+            var userVM = _mapper.Map<UserViewModel>(user);
+            var detailsVM = userDetails != null ? _mapper.Map<UserDetailsViewModel>(userDetails) : null;
+
+            return new DetailsViewModel
+            {
+                user = userVM,
+                details = detailsVM
+            };
         }
     }
 }

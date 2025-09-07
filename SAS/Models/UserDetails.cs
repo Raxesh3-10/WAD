@@ -7,14 +7,17 @@ namespace SAS.Models
     public class UserDetails
     {
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [Required(ErrorMessage = "User is required.")]
+        public Guid UserId { get; set; }
+
         public User User { get; set; }
 
-        public ICollection<string> Subjects { get; set; } = new List<string>();
-
-        public ICollection<int> Std { get; set; } = new List<int>();
+        public ICollection<UserSubject> Subjects { get; set; } = new List<UserSubject>();
+        public ICollection<UserStd> Stds { get; set; } = new List<UserStd>();
+        public ICollection<UserQualification> Qualifications { get; set; } = new List<UserQualification>();
+        public ICollection<UserDocument> Documents { get; set; } = new List<UserDocument>();
 
         [Required(ErrorMessage = "Salary is required.")]
         [Range(0, double.MaxValue, ErrorMessage = "Salary must be non-negative.")]
@@ -25,9 +28,7 @@ namespace SAS.Models
         public DateTime Dob { get; set; }
 
         [Url(ErrorMessage = "Photo must be a valid URL.")]
-        public string? Photo { get; set; }
-
-        public ICollection<string> Qualifications { get; set; } = new List<string>();
+        public string Photo { get; set; }
 
         [Range(0, int.MaxValue, ErrorMessage = "Experience must be a non-negative integer.")]
         public int Experience { get; set; }
@@ -40,8 +41,46 @@ namespace SAS.Models
         public string Address { get; set; } = string.Empty;
 
         [Phone(ErrorMessage = "Invalid phone number format.")]
-        public string? Phone { get; set; }
+        public string Phone { get; set; }
+    }
 
-        public ICollection<string> Documents { get; set; } = new List<string>();
+    public class UserSubject
+    {
+        [Key]
+        public int Id { get; set; }
+        public string SubjectName { get; set; }
+
+        public Guid UserDetailsId { get; set; }
+        public UserDetails UserDetails { get; set; }
+    }
+
+    public class UserStd
+    {
+        [Key]
+        public int Id { get; set; }
+        public int Std { get; set; }
+
+        public Guid UserDetailsId { get; set; }
+        public UserDetails UserDetails { get; set; }
+    }
+
+    public class UserQualification
+    {
+        [Key]
+        public int Id { get; set; }
+        public string QualificationName { get; set; }
+
+        public Guid UserDetailsId { get; set; }
+        public UserDetails UserDetails { get; set; }
+    }
+
+    public class UserDocument
+    {
+        [Key]
+        public int Id { get; set; }
+        public string DocumentUrl { get; set; }
+
+        public Guid UserDetailsId { get; set; }
+        public UserDetails UserDetails { get; set; }
     }
 }

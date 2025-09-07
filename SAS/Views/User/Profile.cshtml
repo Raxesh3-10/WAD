@@ -1,38 +1,58 @@
-﻿@model SAS.Models.User
+﻿@model SAS.ViewModels.UserViewModel
+@using Microsoft.AspNetCore.Http
 @{
     ViewData["Title"] = "Profile";
+    var userRole = Context.Session.GetString("UserRole");
 }
 
 <div class="container mt-4">
     <div class="card shadow">
         <div class="card-body">
-            <h3 class="text-primary">Your Profile</h3>
+            <h3 class="text-primary">Update Password, Email & Name</h3>
 
-            @if (ViewBag.Error != null)
+            @if (ViewBag.Message != null)
             {
-                <div class="alert alert-danger">@ViewBag.Error</div>
+                <div class="alert alert-info">@ViewBag.Message</div>
             }
 
-            <form method="post" asp-action="UpdateProfile">
-                <div class="mb-3">
-                    <label asp-for="Name" class="form-label">Name</label>
-                    <input asp-for="Name" class="form-control" required />
+            <form method="post" asp-action="UpdateProfile" id="profileForm">
+                <input type="hidden" asp-for="Id" />
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <input asp-for="Name" name="name" class="form-control" placeholder="Name" required />
+                    </div>
+                    <div class="col-md-6">
+                        <input asp-for="Email" name="email" type="email" class="form-control" placeholder="New Email" required />
+                    </div>
+                    <div class="col-md-6">
+                        <input asp-for="Password" name="password" type="password" class="form-control" placeholder="New Password" required />
+                    </div>
+                    <div class="col-md-6">
+                        <input type="password" name="confirmPassword" class="form-control" placeholder="Confirm Password" required />
+                    </div>
+
+                    <div class="col-md-6">
+                        <select asp-for="Role" name="role" class="form-select" disabled>
+                            <option value="teacher">Teacher</option>
+                            <option value="principal">Principal</option>
+                            <option value="trustee">Trustee</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6 d-flex align-items-start">
+                        <button type="button" class="btn btn-warning me-2" onclick="sendOtp()">Send OTP</button>
+                        <input type="text" name="otp" id="otpInput" class="form-control" placeholder="Enter OTP" disabled required />
+                    </div>
+
+                    <div class="col-12 mt-3">
+                        <button type="submit" class="btn btn-primary">Verify & Update</button>
+                        <button type="button" class="btn btn-danger ms-3" onclick="deleteAccount()">Delete Account</button>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label asp-for="Email" class="form-label">Email</label>
-                    <input asp-for="Email" class="form-control" readonly />
-                </div>
-                <div class="mb-3">
-                    <label asp-for="Password" class="form-label">New Password</label>
-                    <input asp-for="Password" class="form-control" value="" required />
-                </div>
-                <div class="mb-3 input-group">
-                    <input type="text" name="otp" class="form-control" placeholder="Enter OTP" required />
-                    <button type="button" class="btn btn-outline-secondary" onclick="sendOtp()">Send OTP</button>
-                </div>
-                <div id="otpStatus" class="text-muted mb-3"></div>
-                <button type="submit" class="btn btn-primary">Update</button>
             </form>
+
+            <div id="profileMessage" class="mt-3 text-danger"></div>
         </div>
     </div>
 </div>
@@ -40,14 +60,44 @@
 @section Scripts {
     <script>
         function sendOtp() {
-            const email = document.querySelector('[name="Email"]').value;
+            const email = document.querySelector('[name="email"]').value;
+            if (!email) {
+                document.getElementById("profileMessage").innerText = "Email is required";
+                return;
+            }
+
             fetch('/User/SendOtp', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: 'email=' + encodeURIComponent(email)
             })
-                .then(res => res.json())
-                .then(res => document.getElementById('otpStatus').innerText = res.message);
+            .then(res => res.json())
+            .then(res => {
+                document.getElementById("profileMessage").innerText = res.message || "OTP sent to your email.";
+                document.getElementById("otpInput").disabled = false;
+            })
+            .catch(() => {
+                document.getElementById("profileMessage").innerText = "Failed to send OTP";
+            });
+        }
+
+        function deleteAccount() {
+            if (!confirm("Are you sure you want to delete your account?")) return;
+
+            const userId = document.querySelector('[name="Id"]').value;
+            fetch('/User/DeleteAccount?id=' + encodeURIComponent(userId), {
+                method: 'POST'
+            })
+            .then(res => {
+                if (res.ok) {
+                    window.location.href = '/Auth/Login';
+                } else {
+                    document.getElementById("profileMessage").innerText = "Delete failed";
+                }
+            })
+            .catch(() => {
+                document.getElementById("profileMessage").innerText = "Delete failed";
+            });
         }
     </script>
 }

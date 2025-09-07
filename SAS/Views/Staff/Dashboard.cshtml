@@ -1,0 +1,17 @@
+﻿@{
+    ViewData["Title"] = "Staff Dashboard";
+    var profile = ViewBag.Profile as SAS.Models.User;
+}
+
+<div class="container mt-4">
+    <div class="card mb-4">
+        <div class="card-body">
+            <h3 class="text-primary">Welcome, @profile.Name <small class="text-muted">(@profile.Role)</small></h3>
+            <p><strong>Email:</strong> @profile.Email</p>
+        </div>
+    </div>
+
+    <vc:notice-readonly></vc:notice-readonly>
+    @await Component.InvokeAsync("ReportBug", new { name = profile.Name, email = profile.Email })
+    }
+</div>

@@ -19,59 +19,81 @@ namespace SAS.Controllers
             _mapper = mapper;
         }
 
-        public IActionResult CreateStudent([FromBody] StudentViewModel studentVm)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult CreateStudent(StudentViewModel studentVm)
         {
             if (!IsAuthorized("principal")) return Unauthorized();
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid) return ViewComponent("Student");
 
             var student = _mapper.Map<Student>(studentVm);
             _studentRepo.Add(student);
 
-            var resultVm = _mapper.Map<StudentViewModel>(student);
-            return Ok(new { message = "Student created successfully", student = resultVm });
+            TempData["SuccessMessage"] = "Student created successfully.";
+            return RedirectToAction("Dashboard", "Principal"); 
         }
 
-        public IActionResult EditStudent(string email, [FromBody] StudentViewModel studentVm)
+        [HttpGet]
+        public IActionResult EditStudent(string email)
         {
             if (!IsAuthorized("principal")) return Unauthorized();
-            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var updatedStudent = _mapper.Map<Student>(studentVm);
-            _studentRepo.Update(email, updatedStudent);
+            var student = _studentRepo.GetByEmail(email);
+            if (student == null) return NotFound();
 
-            var resultVm = _mapper.Map<StudentViewModel>(updatedStudent);
-            return Ok(new { message = "Student updated successfully", student = resultVm });
+            var vm = _mapper.Map<StudentViewModel>(student);
+            return View(vm);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult EditStudent(StudentViewModel studentVm)
+        {
+            if (!IsAuthorized("principal")) return Unauthorized();
+            if (!ModelState.IsValid) return View(studentVm);
+
+            var updatedStudent = _mapper.Map<Student>(studentVm);
+            _studentRepo.Update(studentVm.Email, updatedStudent);
+
+            TempData["SuccessMessage"] = "Student updated successfully.";
+            return RedirectToAction("Dashboard", "Principal");
+        }
+
+        [HttpGet]
         public IActionResult DeleteStudent(string email)
         {
             if (!IsAuthorized("principal")) return Unauthorized();
 
             var student = _studentRepo.GetByEmail(email);
-            if (student == null) return NotFound(new { message = "Student not found" });
+            if (student == null) return NotFound();
 
             _studentRepo.Delete(email);
-            return Ok(new { message = "Student deleted successfully" });
+
+            TempData["SuccessMessage"] = "Student deleted successfully.";
+            return RedirectToAction("Dashboard", "Principal");
         }
 
+        [HttpGet]
         public IActionResult GetStudent(string email)
         {
             if (!IsAuthorized("principal")) return Unauthorized();
 
             var student = _studentRepo.GetByEmail(email);
-            if (student == null) return NotFound(new { message = "Student not found" });
+            if (student == null) return NotFound();
 
             var studentVm = _mapper.Map<StudentViewModel>(student);
-            return Ok(studentVm);
+            return View(studentVm);
         }
 
+        [HttpGet]
         public IActionResult GetAllStudents()
         {
             if (!IsAuthorized("principal")) return Unauthorized();
 
             var students = _studentRepo.GetAll().ToList();
             var studentVms = students.Select(s => _mapper.Map<StudentViewModel>(s)).ToList();
-            return Ok(studentVms);
+
+            return View(studentVms);
         }
 
         private bool IsAuthorized(string role) =>

@@ -1,0 +1,33 @@
+﻿@model SAS.ViewModels.ReportBugViewModel
+
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Report a Bug</h5>
+
+        <form asp-action="ReportBug" asp-controller="User" method="post" class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="Name" class="form-label"></label>
+                <input asp-for="Name" class="form-control" readonly />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control" readonly />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="col-12">
+                <label asp-for="Message" class="form-label"></label>
+                <textarea asp-for="Message" class="form-control" rows="5" placeholder="Describe the bug..." required></textarea>
+                <span asp-validation-for="Message" class="text-danger"></span>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-warning w-100">Send Report</button>
+            </div>
+            @if (!string.IsNullOrEmpty(Model?.StatusMessage))
+            {
+                <p class="text-center mt-3">@Model.StatusMessage</p>
+            }
+        </form>
+
+    </div>
+</div>

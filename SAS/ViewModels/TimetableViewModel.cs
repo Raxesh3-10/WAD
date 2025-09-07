@@ -31,7 +31,6 @@ namespace SAS.ViewModels
         public int DaysInWeek { get; set; }
 
         public ICollection<int> Stds { get; set; } = new List<int>();
-
         public ICollection<string> Subjects { get; set; } = new List<string>();
     }
 }

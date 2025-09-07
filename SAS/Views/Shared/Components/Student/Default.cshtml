@@ -1,0 +1,28 @@
+﻿@model List<SAS.ViewModels.StudentViewModel>
+
+<div class="card shadow-sm mb-4" id="student-component">
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-create">
+                Add Student
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-read">
+                View Students
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <!-- Create Student -->
+        <div class="tab-pane fade show active p-3" id="tab-create">
+            @await Html.PartialAsync("_CreateStudent", new SAS.ViewModels.StudentViewModel())
+        </div>
+
+        <!-- View Students -->
+        <div class="tab-pane fade p-3" id="tab-read">
+            @await Html.PartialAsync("_ListStudents", Model)
+        </div>
+    </div>
+</div>

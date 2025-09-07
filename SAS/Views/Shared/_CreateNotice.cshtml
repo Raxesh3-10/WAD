@@ -1,0 +1,25 @@
+﻿@model SAS.ViewModels.NoticeViewModel
+
+<form asp-action="CreateNotice" asp-controller="Notice" method="post" class="row g-3">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="NoticeId" />
+
+    <div class="col-md-4">
+        <input asp-for="Subject" class="form-control" placeholder="Subject" />
+        <span asp-validation-for="Subject" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-4">
+        <textarea asp-for="Message" class="form-control" placeholder="Message"></textarea>
+        <span asp-validation-for="Message" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-4">
+        <input asp-for="Date" class="form-control" type="date" value="@Model?.Date.ToString("yyyy-MM-dd") ?? DateTime.Today.ToString(" yyyy-MM-dd")" />
+        <span asp-validation-for="Date" class="text-danger"></span>
+    </div>
+
+    <div class="col-12">
+        <button type="submit" class="btn btn-success w-100">Submit</button>
+    </div>
+</form>

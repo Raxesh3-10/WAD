@@ -22,7 +22,7 @@ namespace SAS.Repositories
                 .ToList();
         }
 
-        public Notice GetByEmail(string email)
+        public Notice? GetByEmail(string email)
         {
             return _context.Notices
                 .Include(n => n.User)
@@ -34,6 +34,9 @@ namespace SAS.Repositories
             var user = _context.Users.FirstOrDefault(u => u.Id == notice.UserId);
             if (user == null)
                 throw new InvalidOperationException("User not found");
+
+            if (notice.NoticeId == Guid.Empty)
+                notice.NoticeId = Guid.NewGuid();
 
             _context.Notices.Add(notice);
             _context.SaveChanges();
@@ -68,11 +71,9 @@ namespace SAS.Repositories
             _context.SaveChanges();
             return true;
         }
-
-        // Extra: DELETE by NoticeId
-        public bool DeleteById(int id)
+        public bool DeleteById(Guid id)
         {
-            var notice = _context.Notices.Find(id);
+            var notice = _context.Notices.FirstOrDefault(n => n.NoticeId == id);
             if (notice == null) return false;
 
             _context.Notices.Remove(notice);

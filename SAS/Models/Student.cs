@@ -1,10 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace SAS.Models
 {
     public class Student
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         [Required]
         public string StudentName { get; set; }
 

@@ -25,7 +25,7 @@ namespace SAS.Services
             };
 
             var mailMessage = new MailMessage(fromEmail, toEmail, subject, message);
-            client.Send(mailMessage); // ✅ Synchronous send
+            client.Send(mailMessage); 
         }
 
         public void SendOtp(string toEmail, string otp)
@@ -38,9 +38,21 @@ namespace SAS.Services
         public void ReportBug(string userName, string userEmail, string message)
         {
             var devEmail = _config["MailSettings:DevEmail"];
-            var subject = $"Bug Report from {userName} ({userEmail})";
-            var body = $"Bug Message:\n{message}";
-            SendEmail(subject, body, devEmail);
+
+            var subjectToDev = $"Bug Report from {userName} ({userEmail})";
+            var bodyToDev = $"Bug Message:\n{message}";
+            SendEmail(subjectToDev, bodyToDev, devEmail);
+
+            var subjectToUser = "Thank you for reporting a bug - SAS Platform";
+            var bodyToUser =
+                $"Hi {userName},\n\n" +
+                "Thank you for taking the time to report a bug. " +
+                "Our development team has received your report and will look into it shortly.\n\n" +
+                "Bug you reported:\n" +
+                $"{message}\n\n" +
+                "Best regards,\nSAS Support Team";
+
+            SendEmail(subjectToUser, bodyToUser, userEmail);
         }
     }
 }

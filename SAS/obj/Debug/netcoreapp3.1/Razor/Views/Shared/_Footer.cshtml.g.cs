@@ -20,7 +20,7 @@ using SAS
     ;
 #nullable restore
 #line 2 "C:\Users\gotur\OneDrive\Documents\SAS\SAS\Views\_ViewImports.cshtml"
-using SAS.Models
+using SAS.ViewModels
 
 #nullable disable
     ;
@@ -33,7 +33,7 @@ using Microsoft.AspNetCore.Http
 #nullable disable
     ;
     [global::Microsoft.AspNetCore.Razor.Hosting.RazorSourceChecksumAttribute(@"Sha256", @"364f32f3f6a91b87f0934447c07d1634c21fd0311e46ae99f8840b6a8b05834d", @"/Views/Shared/_Footer.cshtml")]
-    [global::Microsoft.AspNetCore.Razor.Hosting.RazorSourceChecksumAttribute(@"Sha256", @"d4bcbfc5eb3a97cfcb0ab90b7e8d4c25d6acc3ad1b8c0af05998c3becdbc77a9", @"/Views/_ViewImports.cshtml")]
+    [global::Microsoft.AspNetCore.Razor.Hosting.RazorSourceChecksumAttribute(@"Sha256", @"fe25b1272f399b34b9b751d8a2df0182a11a7973c0998638f524daf1fa26f209", @"/Views/_ViewImports.cshtml")]
     #nullable restore
     public class Views_Shared__Footer : global::Microsoft.AspNetCore.Mvc.Razor.RazorPage<dynamic>
     #nullable disable
