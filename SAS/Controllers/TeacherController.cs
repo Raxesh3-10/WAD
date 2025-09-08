@@ -24,14 +24,18 @@ namespace SAS.Controllers
 
         public IActionResult Dashboard()
         {
-            if (!IsAuthorized("teacher")) return Unauthorized();
+            if (!IsAuthorized("teacher")) return HandleUnauthorized();
 
             var currentUser = GetCurrentUser();
             ViewBag.Profile = _mapper.Map<UserViewModel>(currentUser);
             
             return View();
         }
-
+        private IActionResult HandleUnauthorized()
+        {
+            HttpContext.Session.Clear();
+            return RedirectToAction("Login", "User");
+        }
         private bool IsAuthorized(string role) =>
             HttpContext.Session.GetString("UserRole") == role;
 

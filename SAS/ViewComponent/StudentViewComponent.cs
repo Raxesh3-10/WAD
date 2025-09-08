@@ -3,7 +3,6 @@ using SAS.Repositories;
 using SAS.ViewModels;
 using AutoMapper;
 using System.Linq;
-using System.Threading.Tasks;
 using SAS.Models;
 
 namespace SAS.ViewComponents
@@ -19,7 +18,7 @@ namespace SAS.ViewComponents
             _mapper = mapper;
         }
 
-        public async Task<IViewComponentResult> InvokeAsync()
+        public IViewComponentResult Invoke()
         {
             var students = _studentRepo.GetAll().ToList();
             var studentVms = students.Select(s => _mapper.Map<StudentViewModel>(s)).ToList();

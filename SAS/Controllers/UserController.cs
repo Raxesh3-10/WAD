@@ -29,10 +29,13 @@ namespace SAS.Controllers
         }
 
         [HttpGet]
-        public IActionResult Login() => View();
+        public IActionResult Login()
+        {
+            Logout();
+            return View();
+        }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public IActionResult Login(string email, string password, string role)
         {
             var user = _userRepo.GetByEmail(email);
@@ -56,10 +59,13 @@ namespace SAS.Controllers
         }
 
         [HttpGet]
-        public IActionResult Signup() => View();
+        public IActionResult Signup()
+        {
+            HttpContext.Session.Clear();
+            return View();
+        }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public IActionResult Signup(UserViewModel userVm, string otp)
         {
             if (!ModelState.IsValid)
@@ -110,7 +116,6 @@ namespace SAS.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public IActionResult UpdateProfile(UserViewModel updatedVm, string otp, string confirmPassword)
         {
             var email = HttpContext.Session.GetString("UserEmail");
@@ -162,7 +167,6 @@ namespace SAS.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public IActionResult ReportBug(ReportBugViewModel model)
         {
             if (!ModelState.IsValid)

@@ -27,7 +27,7 @@ namespace SAS.Controllers
 
         public IActionResult Dashboard()
         {
-            if (!IsAuthorized("principal")) return Unauthorized();
+            if (!IsAuthorized("principal")) return HandleUnauthorized();
 
             var currentUser = GetCurrentUser();
             ViewBag.Profile = _mapper.Map<UserViewModel>(currentUser);
@@ -49,7 +49,11 @@ namespace SAS.Controllers
             var email = HttpContext.Session.GetString("UserEmail");
             return _userRepo.GetByEmail(email ?? "");
         }
-
+        private IActionResult HandleUnauthorized()
+        {
+            HttpContext.Session.Clear();
+            return RedirectToAction("Login", "User");
+        }
         private DetailsViewModel BuildUserDetailsVM(User user)
         {
             var userDetails = _userDetailsRepo.GetByUserId(user.Id);

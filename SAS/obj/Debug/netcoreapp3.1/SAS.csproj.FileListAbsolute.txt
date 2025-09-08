@@ -227,5 +227,5 @@ C:\Users\gotur\OneDrive\Documents\SAS\SAS\bin\Debug\netcoreapp3.1\Microsoft.DotN
 C:\Users\gotur\OneDrive\Documents\SAS\SAS\bin\Debug\netcoreapp3.1\Microsoft.Extensions.DependencyModel.dll
 C:\Users\gotur\OneDrive\Documents\SAS\SAS\obj\Debug\netcoreapp3.1\Razor\Views\Shared\_CreateNotice.cshtml.g.cs
 C:\Users\gotur\OneDrive\Documents\SAS\SAS\obj\Debug\netcoreapp3.1\Razor\Views\Shared\_CreateStudent.cshtml.g.cs
-C:\Users\gotur\OneDrive\Documents\SAS\SAS\obj\Debug\netcoreapp3.1\Razor\Views\Shared\_ListStudents.cshtml.g.cs
 C:\Users\gotur\OneDrive\Documents\SAS\SAS\obj\Debug\netcoreapp3.1\Razor\Views\Shared\_EditNotice.cshtml.g.cs
+C:\Users\gotur\OneDrive\Documents\SAS\SAS\obj\Debug\netcoreapp3.1\Razor\Views\Shared\_EditStudent.cshtml.g.cs

@@ -3,39 +3,58 @@
 <form asp-action="CreateStudent" asp-controller="Student" method="post" id="create-student-form" class="row g-3">
     @Html.AntiForgeryToken()
 
+    <div asp-validation-summary="All" class="text-danger mb-2"></div>
+
     <div class="col-md-6">
+        <label asp-for="StudentName" class="form-label"></label>
         <input asp-for="StudentName" class="form-control" placeholder="Student Name" />
         <span asp-validation-for="StudentName" class="text-danger"></span>
     </div>
+
     <div class="col-md-6">
+        <label asp-for="FatherName" class="form-label"></label>
         <input asp-for="FatherName" class="form-control" placeholder="Father Name" />
         <span asp-validation-for="FatherName" class="text-danger"></span>
     </div>
+
     <div class="col-md-6">
+        <label asp-for="MotherName" class="form-label"></label>
         <input asp-for="MotherName" class="form-control" placeholder="Mother Name" />
         <span asp-validation-for="MotherName" class="text-danger"></span>
     </div>
+
     <div class="col-md-6">
+        <label asp-for="Email" class="form-label"></label>
         <input asp-for="Email" class="form-control" placeholder="Email" />
         <span asp-validation-for="Email" class="text-danger"></span>
     </div>
+
     <div class="col-md-6">
+        <label asp-for="AadharNo" class="form-label"></label>
         <input asp-for="AadharNo" class="form-control" placeholder="Aadhar No" />
         <span asp-validation-for="AadharNo" class="text-danger"></span>
     </div>
+
     <div class="col-md-6">
+        <label asp-for="RollNo" class="form-label"></label>
         <input asp-for="RollNo" class="form-control" placeholder="Roll No" />
         <span asp-validation-for="RollNo" class="text-danger"></span>
     </div>
+
     <div class="col-md-6">
+        <label asp-for="Div" class="form-label"></label>
         <input asp-for="Div" class="form-control" placeholder="Division" />
         <span asp-validation-for="Div" class="text-danger"></span>
     </div>
+
     <div class="col-md-6">
+        <label asp-for="Std" class="form-label"></label>
         <input asp-for="Std" class="form-control" placeholder="Standard" />
         <span asp-validation-for="Std" class="text-danger"></span>
     </div>
+
     <div class="col-md-6">
+        <label asp-for="PhoneNo" class="form-label"></label>
         <input asp-for="PhoneNo" class="form-control" placeholder="Phone No" />
         <span asp-validation-for="PhoneNo" class="text-danger"></span>
     </div>

@@ -1,6 +1,6 @@
 ﻿@{
     ViewData["Title"] = "Teacher Dashboard";
-    var profile = ViewBag.Profile as SAS.Models.User;
+    var profile = ViewBag.Profile as SAS.ViewModels.UserViewModel;
 }
 
 <div class="container mt-4">
@@ -11,9 +11,7 @@
         </div>
     </div>
 
-    <vc:notice-readonly></vc:notice-readonly>
-
-    <vc:student></vc:student>
-    @await Component.InvokeAsync("ReportBug", new { name = profile.Name, email = profile.Email })
-    }
+    @await Component.InvokeAsync("NoticeReadonly")
+    @await Component.InvokeAsync("Student")
+    @await Component.InvokeAsync("ReportBug", new { name = profile?.Name, email = profile?.Email })
 </div>

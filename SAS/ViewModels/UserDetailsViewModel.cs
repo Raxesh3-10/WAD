@@ -7,8 +7,6 @@ namespace SAS.ViewModels
 {
     public class UserDetailsViewModel
     {
-        [Required(ErrorMessage = "User email is required.")]
-        [EmailAddress(ErrorMessage = "Invalid email format.")]
         public string UserEmail { get; set; } = string.Empty;
 
         public List<string>? Subjects { get; set; }
@@ -19,19 +17,16 @@ namespace SAS.ViewModels
         public string? StdText { get; set; }
         public string? QualificationsText { get; set; }
 
-        [Required(ErrorMessage = "Salary is required.")]
         [Range(0, double.MaxValue, ErrorMessage = "Salary must be non-negative.")]
         public decimal? Salary { get; set; }
 
-        [Required(ErrorMessage = "Date of Birth is required.")]
-        [DataType(DataType.Date)]
+        [Required(ErrorMessage = "Date of birth is required.")]
         public DateTime Dob { get; set; }
 
         [Range(0, int.MaxValue, ErrorMessage = "Experience must be non-negative.")]
         public int? Experience { get; set; }
 
-        [Required(ErrorMessage = "Joining Date is required.")]
-        [DataType(DataType.Date)]
+        [Required(ErrorMessage = "Joining date is required.")]
         public DateTime JoiningDate { get; set; }
 
         [Required(ErrorMessage = "Address is required.")]

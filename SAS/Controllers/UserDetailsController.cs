@@ -76,14 +76,19 @@ namespace SAS.Controllers
 
             if (!ModelState.IsValid)
             {
+                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    Console.WriteLine("Validation Error: " + error.ErrorMessage);
+                }
+
+                ViewBag.StatusMsg = "Please correct the highlighted errors.";
                 updatedDetails.EditMode = true;
                 return View("Details", updatedDetails);
             }
 
-            // Map updated values into existing entity
+            // Map updated values into entity
             MapViewModelToEntity(updatedDetails, existing);
 
-            // Save through repository
             var success = _repository.UpdateDetails(userId.Value, existing, updatedDetails.PhotoFile, updatedDetails.NewDocuments?.ToList());
 
             ViewBag.StatusMsg = success ? "Details updated successfully" : "Failed to update user details";
@@ -96,15 +101,20 @@ namespace SAS.Controllers
         #region Mapping Helpers
         private void MapViewModelToEntity(UserDetailsViewModel vm, UserDetails entity)
         {
-            // Collections
+            // Subjects
             entity.Subjects = vm.SubjectsText?.Split(',', StringSplitOptions.RemoveEmptyEntries)
                 .Select(s => new UserSubject { SubjectName = s.Trim(), UserDetailsId = entity.Id })
                 .ToList() ?? new List<UserSubject>();
 
+            // Standards (safe parsing)
             entity.Stds = vm.StdText?.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                .Select(s => new UserStd { Std = int.Parse(s.Trim()), UserDetailsId = entity.Id })
+                .Select(s => int.TryParse(s.Trim(), out var std)
+                    ? new UserStd { Std = std, UserDetailsId = entity.Id }
+                    : null)
+                .Where(s => s != null)
                 .ToList() ?? new List<UserStd>();
 
+            // Qualifications
             entity.Qualifications = vm.QualificationsText?.Split(',', StringSplitOptions.RemoveEmptyEntries)
                 .Select(q => new UserQualification { QualificationName = q.Trim(), UserDetailsId = entity.Id })
                 .ToList() ?? new List<UserQualification>();
@@ -121,7 +131,7 @@ namespace SAS.Controllers
             if (vm.PhotoFile != null)
             {
                 if (!string.IsNullOrEmpty(entity.Photo))
-                    DeleteFromCloudinary(entity.Photo);
+                    DeleteFromCloudinary(entity.Photo, isImage: true);
 
                 entity.Photo = UploadImageToCloudinary(vm.PhotoFile, "photos");
             }
@@ -135,7 +145,7 @@ namespace SAS.Controllers
                 {
                     if (index >= 0 && index < docsToKeep.Count)
                     {
-                        DeleteFromCloudinary(docsToKeep[index].DocumentUrl);
+                        DeleteFromCloudinary(docsToKeep[index].DocumentUrl, isImage: false);
                         docsToKeep.RemoveAt(index);
                     }
                 }
@@ -156,6 +166,9 @@ namespace SAS.Controllers
         private UserDetailsViewModel MapToViewModel(UserDetails details)
         {
             var vm = _mapper.Map<UserDetailsViewModel>(details);
+            vm.UserEmail = details.User?.Email ?? string.Empty;
+            vm.Dob = details.Dob;
+            vm.JoiningDate = details.JoiningDate;
 
             vm.SubjectsText = details.Subjects?.Any() == true
                 ? string.Join(", ", details.Subjects.Select(s => s.SubjectName))
@@ -199,7 +212,7 @@ namespace SAS.Controllers
             return result.SecureUrl?.ToString() ?? string.Empty;
         }
 
-        private void DeleteFromCloudinary(string url)
+        private void DeleteFromCloudinary(string url, bool isImage)
         {
             if (string.IsNullOrEmpty(url)) return;
 
@@ -211,7 +224,10 @@ namespace SAS.Controllers
                 var folder = folderIndex > 0 ? string.Join("/", parts[folderIndex..^1]) : string.Empty;
 
                 var publicId = string.IsNullOrEmpty(folder) ? filename : $"{folder}/{filename}";
-                _cloudinary.Destroy(new DeletionParams(publicId));
+                _cloudinary.Destroy(new DeletionParams(publicId)
+                {
+                    ResourceType = isImage ? ResourceType.Image : ResourceType.Raw
+                });
             }
             catch (Exception ex)
             {
@@ -223,7 +239,9 @@ namespace SAS.Controllers
         private Guid? GetUserIdFromSession()
         {
             var userIdString = HttpContext.Session.GetString("UserId");
-            return Guid.Parse(userIdString);
+            if (string.IsNullOrEmpty(userIdString)) return null;
+            if (Guid.TryParse(userIdString, out var userId)) return userId;
+            return null;
         }
     }
 }
