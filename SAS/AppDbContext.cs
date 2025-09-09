@@ -14,9 +14,5 @@ namespace SAS
         public DbSet<User> Users { get; set; }
         public DbSet<Notice> Notices { get; set; }
         public DbSet<UserDetails> UserDetails { get; set; }
-        public DbSet<UserDocument> UserDocuments { get; set; }
-        public DbSet<UserQualification> UserQualifications { get; set; }
-        public DbSet<UserSubject> UserSubjects { get; set; }
-        public DbSet<UserStd> UserStds { get; set; }
     }
 }

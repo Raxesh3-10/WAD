@@ -2,6 +2,8 @@
 @{
     ViewData["Title"] = "Principal Dashboard";
 
+
+
     var profile = ViewBag.Profile as UserViewModel;
 
     var teachers = ViewBag.Teachers as List<DetailsViewModel>;
@@ -64,26 +66,28 @@
                                 </td>
                                 <td>@teacher.user?.Name</td>
                                 <td>@teacher.user?.Email</td>
-                                <td>@string.Join(", ", teacher.details?.Subjects ?? new List<string>())</td>
-                                <td>@string.Join(", ", teacher.details?.Std ?? new List<int>())</td>
-                                <td>@string.Join(", ", teacher.details?.Qualifications ?? new List<string>())</td>
-                                <td>@teacher.details?.Salary?.ToString("C")</td>
+                                <td>@teacher.details?.Subjects</td>
+                                <td>@teacher.details?.Stds</td>
+                                <td>@teacher.details?.Qualifications</td>
+                                <td>@teacher.details?.Salary.ToString("C")</td>
                                 <td>@teacher.details?.Dob.ToShortDateString()</td>
                                 <td>@teacher.details?.Experience</td>
                                 <td>@teacher.details?.JoiningDate.ToShortDateString()</td>
                                 <td>@teacher.details?.Phone</td>
                                 <td>@teacher.details?.Address</td>
                                 <td>
-                                    @if (teacher.details?.Documents != null)
+                                    @if (!string.IsNullOrEmpty(teacher.details?.Documents))
 
                                     {
-                                        @foreach (var doc in teacher.details.Documents)
+
+                                        foreach (var doc in teacher.details.Documents.Split(',', StringSplitOptions.RemoveEmptyEntries))
 
                                         {
-                                            <a href="@doc" target="_blank">View</a>
+                                            <a href="@doc.Trim()" target="_blank">View</a>
 
                                             <br />
                                         }
+
                                     }
                                 </td>
                             </tr>
@@ -132,7 +136,7 @@
                                 </td>
                                 <td>@staff.user?.Name</td>
                                 <td>@staff.user?.Email</td>
-                                <td>@staff.details?.Salary?.ToString("C")</td>
+                                <td>@staff.details?.Salary.ToString("C")</td>
                                 <td>@staff.details?.Dob.ToShortDateString()</td>
                                 <td>@staff.details?.Experience</td>
                                 <td>@staff.details?.JoiningDate.ToShortDateString()</td>

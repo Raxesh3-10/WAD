@@ -24,7 +24,6 @@ namespace SAS.Controllers
             _userDetailsRepo = userDetailsRepo;
             _mapper = mapper;
         }
-
         public IActionResult Dashboard()
         {
             if (!IsAuthorized("trustee")) return HandleUnauthorized();
@@ -39,6 +38,23 @@ namespace SAS.Controllers
             ViewBag.Teachers = teachers.Select(t => BuildUserDetailsVM(t)).ToList();
             ViewBag.Principals = principals.Select(p => BuildUserDetailsVM(p)).ToList();
             ViewBag.Staffs = staffs.Select(s => BuildUserDetailsVM(s)).ToList();
+
+            // --- Salary Totals ---
+            var teacherSalaries = teachers
+                .Select(t => _userDetailsRepo.GetByUserId(t.Id)?.Salary ?? 0)
+                .Sum();
+
+            var principalSalaries = principals
+                .Select(p => _userDetailsRepo.GetByUserId(p.Id)?.Salary ?? 0)
+                .Sum();
+
+            var staffSalaries = staffs
+                .Select(s => _userDetailsRepo.GetByUserId(s.Id)?.Salary ?? 0)
+                .Sum();
+
+            ViewBag.TotalTeacherSalary = teacherSalaries;
+            ViewBag.TotalPrincipalSalary = principalSalaries;
+            ViewBag.TotalStaffSalary = staffSalaries;
 
             return View();
         }

@@ -10,8 +10,8 @@ using SAS;
 namespace SAS.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250907101749_first")]
-    partial class first
+    [Migration("20250909115030_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -126,11 +126,13 @@ namespace SAS.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Address")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("Dob")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Documents")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Experience")
                         .HasColumnType("int");
@@ -144,8 +146,17 @@ namespace SAS.Migrations
                     b.Property<string>("Photo")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Qualifications")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<decimal>("Salary")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Stds")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Subjects")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
@@ -156,86 +167,6 @@ namespace SAS.Migrations
                         .IsUnique();
 
                     b.ToTable("UserDetails");
-                });
-
-            modelBuilder.Entity("SAS.Models.UserDocument", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("DocumentUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("UserDetailsId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserDetailsId");
-
-                    b.ToTable("UserDocuments");
-                });
-
-            modelBuilder.Entity("SAS.Models.UserQualification", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("QualificationName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("UserDetailsId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserDetailsId");
-
-                    b.ToTable("UserQualifications");
-                });
-
-            modelBuilder.Entity("SAS.Models.UserStd", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("Std")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("UserDetailsId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserDetailsId");
-
-                    b.ToTable("UserStds");
-                });
-
-            modelBuilder.Entity("SAS.Models.UserSubject", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("SubjectName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("UserDetailsId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserDetailsId");
-
-                    b.ToTable("UserSubjects");
                 });
 
             modelBuilder.Entity("SAS.Models.Notice", b =>
@@ -252,42 +183,6 @@ namespace SAS.Migrations
                     b.HasOne("SAS.Models.User", "User")
                         .WithOne("UserDetails")
                         .HasForeignKey("SAS.Models.UserDetails", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("SAS.Models.UserDocument", b =>
-                {
-                    b.HasOne("SAS.Models.UserDetails", "UserDetails")
-                        .WithMany("Documents")
-                        .HasForeignKey("UserDetailsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("SAS.Models.UserQualification", b =>
-                {
-                    b.HasOne("SAS.Models.UserDetails", "UserDetails")
-                        .WithMany("Qualifications")
-                        .HasForeignKey("UserDetailsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("SAS.Models.UserStd", b =>
-                {
-                    b.HasOne("SAS.Models.UserDetails", "UserDetails")
-                        .WithMany("Stds")
-                        .HasForeignKey("UserDetailsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("SAS.Models.UserSubject", b =>
-                {
-                    b.HasOne("SAS.Models.UserDetails", "UserDetails")
-                        .WithMany("Subjects")
-                        .HasForeignKey("UserDetailsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

@@ -9,8 +9,8 @@ namespace SAS.Repositories
     {
         UserDetails? GetByUserId(Guid userId);
         UserDetails CreateEmptyDetails(Guid userId);
-        bool UpdateDetails(Guid userId, UserDetails updatedDetails, IFormFile? photo, List<IFormFile>? documents);
+        bool UpdateDetails(Guid userId, UserDetails updatedDetails, IFormFile? photo, List<IFormFile>? documents, List<int>? removeDocIndexes);
         bool DeleteDetails(Guid userId);
-        public IEnumerable<UserDetails> GetAll();
+        IEnumerable<UserDetails> GetAll();
     }
 }

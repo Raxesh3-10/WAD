@@ -1,14 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using SAS.Models;
 using SAS.Repositories;
 using SAS.ViewModels;
 using AutoMapper;
-using CloudinaryDotNet;
-using CloudinaryDotNet.Actions;
 
 namespace SAS.Controllers
 {
@@ -16,13 +13,11 @@ namespace SAS.Controllers
     {
         private readonly IUserDetailsRepository _repository;
         private readonly IMapper _mapper;
-        private readonly Cloudinary _cloudinary;
 
-        public UserDetailsController(IUserDetailsRepository repository, IMapper mapper, Cloudinary cloudinary)
+        public UserDetailsController(IUserDetailsRepository repository, IMapper mapper)
         {
             _repository = repository;
             _mapper = mapper;
-            _cloudinary = cloudinary;
         }
 
         [HttpGet]
@@ -42,12 +37,13 @@ namespace SAS.Controllers
                 return View(null);
             }
 
-            var vm = MapToViewModel(details);
+            var vm = _mapper.Map<UserDetailsViewModel>(details) ?? new UserDetailsViewModel();
             ViewData["EditMode"] = false;
             return View(vm);
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult ToggleEdit()
         {
             var userId = GetUserIdFromSession();
@@ -56,12 +52,13 @@ namespace SAS.Controllers
             var details = _repository.GetByUserId(userId.Value);
             if (details == null) return RedirectToAction("Details");
 
-            var vm = MapToViewModel(details);
+            var vm = _mapper.Map<UserDetailsViewModel>(details) ?? new UserDetailsViewModel();
             ViewData["EditMode"] = true;
             return View("Details", vm);
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult UpdateDetails(UserDetailsViewModel updatedDetails)
         {
             var userId = GetUserIdFromSession();
@@ -76,165 +73,39 @@ namespace SAS.Controllers
 
             if (!ModelState.IsValid)
             {
-                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
-                {
-                    Console.WriteLine("Validation Error: " + error.ErrorMessage);
-                }
-
                 ViewBag.StatusMsg = "Please correct the highlighted errors.";
                 updatedDetails.EditMode = true;
                 return View("Details", updatedDetails);
             }
 
-            // Map updated values into entity
-            MapViewModelToEntity(updatedDetails, existing);
+            // Map VM -> Entity (simple string fields). Repository handles files/uploads.
+            existing.Subjects = updatedDetails.Subjects ?? string.Empty;
+            existing.Stds = updatedDetails.Stds ?? string.Empty;
+            existing.Qualifications = updatedDetails.Qualifications ?? string.Empty;
+            existing.Salary = updatedDetails.Salary;
+            existing.Dob = updatedDetails.Dob;
+            existing.Experience = updatedDetails.Experience;
+            existing.JoiningDate = updatedDetails.JoiningDate;
+            existing.Address = updatedDetails.Address ?? string.Empty;
+            existing.Phone = updatedDetails.Phone ?? string.Empty;
 
-            var success = _repository.UpdateDetails(userId.Value, existing, updatedDetails.PhotoFile, updatedDetails.NewDocuments?.ToList());
+            // Call repository to handle DB update + Cloudinary (photo/doc uploads & removals)
+            var success = _repository.UpdateDetails(
+                userId.Value,
+                existing,
+                updatedDetails.PhotoFile,
+                updatedDetails.NewDocuments?.ToList(),
+                updatedDetails.RemoveDocIndexes
+            );
 
             ViewBag.StatusMsg = success ? "Details updated successfully" : "Failed to update user details";
 
-            var vm = MapToViewModel(existing);
+            // Re-fetch fresh entity (so vm contains uploaded photo/doc URLs)
+            var refreshed = _repository.GetByUserId(userId.Value) ?? existing;
+            var vm = _mapper.Map<UserDetailsViewModel>(refreshed);
             ViewData["EditMode"] = false;
-            return View("Details", vm);
+            return View("Login", "User");
         }
-
-        #region Mapping Helpers
-        private void MapViewModelToEntity(UserDetailsViewModel vm, UserDetails entity)
-        {
-            // Subjects
-            entity.Subjects = vm.SubjectsText?.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                .Select(s => new UserSubject { SubjectName = s.Trim(), UserDetailsId = entity.Id })
-                .ToList() ?? new List<UserSubject>();
-
-            // Standards (safe parsing)
-            entity.Stds = vm.StdText?.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                .Select(s => int.TryParse(s.Trim(), out var std)
-                    ? new UserStd { Std = std, UserDetailsId = entity.Id }
-                    : null)
-                .Where(s => s != null)
-                .ToList() ?? new List<UserStd>();
-
-            // Qualifications
-            entity.Qualifications = vm.QualificationsText?.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                .Select(q => new UserQualification { QualificationName = q.Trim(), UserDetailsId = entity.Id })
-                .ToList() ?? new List<UserQualification>();
-
-            // Basic fields
-            entity.Salary = vm.Salary ?? 0;
-            entity.Dob = vm.Dob;
-            entity.Experience = vm.Experience ?? 0;
-            entity.JoiningDate = vm.JoiningDate;
-            entity.Address = vm.Address ?? string.Empty;
-            entity.Phone = vm.Phone ?? string.Empty;
-
-            // Photo
-            if (vm.PhotoFile != null)
-            {
-                if (!string.IsNullOrEmpty(entity.Photo))
-                    DeleteFromCloudinary(entity.Photo, isImage: true);
-
-                entity.Photo = UploadImageToCloudinary(vm.PhotoFile, "photos");
-            }
-
-            // Documents
-            var docsToKeep = entity.Documents?.ToList() ?? new List<UserDocument>();
-
-            if (vm.RemoveDocIndexes != null)
-            {
-                foreach (var index in vm.RemoveDocIndexes)
-                {
-                    if (index >= 0 && index < docsToKeep.Count)
-                    {
-                        DeleteFromCloudinary(docsToKeep[index].DocumentUrl, isImage: false);
-                        docsToKeep.RemoveAt(index);
-                    }
-                }
-            }
-
-            if (vm.NewDocuments != null && vm.NewDocuments.Any())
-            {
-                foreach (var doc in vm.NewDocuments)
-                {
-                    var docUrl = UploadFileToCloudinary(doc, "documents");
-                    docsToKeep.Add(new UserDocument { DocumentUrl = docUrl, UserDetailsId = entity.Id });
-                }
-            }
-
-            entity.Documents = docsToKeep;
-        }
-
-        private UserDetailsViewModel MapToViewModel(UserDetails details)
-        {
-            var vm = _mapper.Map<UserDetailsViewModel>(details);
-            vm.UserEmail = details.User?.Email ?? string.Empty;
-            vm.Dob = details.Dob;
-            vm.JoiningDate = details.JoiningDate;
-
-            vm.SubjectsText = details.Subjects?.Any() == true
-                ? string.Join(", ", details.Subjects.Select(s => s.SubjectName))
-                : string.Empty;
-
-            vm.StdText = details.Stds?.Any() == true
-                ? string.Join(", ", details.Stds.Select(s => s.Std))
-                : string.Empty;
-
-            vm.QualificationsText = details.Qualifications?.Any() == true
-                ? string.Join(", ", details.Qualifications.Select(q => q.QualificationName))
-                : string.Empty;
-
-            vm.Documents = details.Documents?.Select(d => d.DocumentUrl).ToList();
-            return vm;
-        }
-        #endregion
-
-        #region Cloudinary Helpers
-        private string UploadImageToCloudinary(IFormFile file, string folder)
-        {
-            using var stream = file.OpenReadStream();
-            var uploadParams = new ImageUploadParams
-            {
-                File = new FileDescription(file.FileName, stream),
-                Folder = folder
-            };
-            var result = _cloudinary.Upload(uploadParams);
-            return result.SecureUrl?.ToString() ?? string.Empty;
-        }
-
-        private string UploadFileToCloudinary(IFormFile file, string folder)
-        {
-            using var stream = file.OpenReadStream();
-            var uploadParams = new RawUploadParams
-            {
-                File = new FileDescription(file.FileName, stream),
-                Folder = folder
-            };
-            var result = _cloudinary.Upload(uploadParams);
-            return result.SecureUrl?.ToString() ?? string.Empty;
-        }
-
-        private void DeleteFromCloudinary(string url, bool isImage)
-        {
-            if (string.IsNullOrEmpty(url)) return;
-
-            try
-            {
-                var parts = url.Split('/');
-                var filename = parts[^1].Split('.')[0];
-                var folderIndex = Array.IndexOf(parts, "upload") + 1;
-                var folder = folderIndex > 0 ? string.Join("/", parts[folderIndex..^1]) : string.Empty;
-
-                var publicId = string.IsNullOrEmpty(folder) ? filename : $"{folder}/{filename}";
-                _cloudinary.Destroy(new DeletionParams(publicId)
-                {
-                    ResourceType = isImage ? ResourceType.Image : ResourceType.Raw
-                });
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error deleting from Cloudinary: " + ex.Message);
-            }
-        }
-        #endregion
 
         private Guid? GetUserIdFromSession()
         {

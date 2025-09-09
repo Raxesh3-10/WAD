@@ -82,7 +82,8 @@ namespace SAS.Controllers
 
             var user = _mapper.Map<User>(userVm);
             _userRepo.Add(user);
-            _detailsRepo.CreateEmptyDetails(user.Id);
+            if(userVm.Role!="trustee")
+                _detailsRepo.CreateEmptyDetails(user.Id);
 
             OtpHelper.ClearOtp(HttpContext);
 

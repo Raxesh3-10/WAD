@@ -2,15 +2,25 @@
 @{
     ViewData["Title"] = "Trustee Dashboard";
 
-
-
     var profile = ViewBag.Profile as UserViewModel;
+
+
 
     var teachers = ViewBag.Teachers as List<DetailsViewModel>;
 
     var staffs = ViewBag.Staffs as List<DetailsViewModel>;
 
     var principals = ViewBag.Principals as List<DetailsViewModel>;
+
+
+
+    var teacherSalary = ViewBag.TotalTeacherSalary ?? 0;
+
+    var principalSalary = ViewBag.TotalPrincipalSalary ?? 0;
+
+    var staffSalary = ViewBag.TotalStaffSalary ?? 0;
+
+    var totalSalary = teacherSalary + principalSalary + staffSalary;
 }
 
 <div class="container mt-4">
@@ -27,6 +37,17 @@
 
     @await Component.InvokeAsync("Notice")
     @await Component.InvokeAsync("ReportBug", new { name = profile?.Name, email = profile?.Email })
+
+    <!-- Salary Distribution Pie Chart -->
+    <div class="card mt-4">
+        <div class="card-header bg-info text-white">Salary Distribution</div>
+        <div class="card-body text-center">
+            <canvas id="salaryPieChart" style="max-height:400px;"></canvas>
+            <p class="mt-3">
+                <strong>Total Salary:</strong> ₹@totalSalary.ToString("N0")
+            </p>
+        </div>
+    </div>
 
     <!-- Principals Section -->
     <div class="card mt-4">
@@ -68,24 +89,26 @@
                                 <td>@principal.user?.Email</td>
                                 <td>@principal.details?.Phone</td>
                                 <td>@principal.details?.Address</td>
-                                <td>@principal.details?.Salary?.ToString("C")</td>
+                                <td>@principal.details?.Salary.ToString("C")</td>
                                 <td>@principal.details?.Dob.ToShortDateString()</td>
                                 <td>@principal.details?.Experience</td>
                                 <td>@principal.details?.JoiningDate.ToShortDateString()</td>
-                                <td>@string.Join(", ", principal.details?.Subjects ?? new List<string>())</td>
-                                <td>@string.Join(", ", principal.details?.Std ?? new List<int>())</td>
-                                <td>@string.Join(", ", principal.details?.Qualifications ?? new List<string>())</td>
+                                <td>@principal.details?.Subjects</td>
+                                <td>@principal.details?.Stds</td>
+                                <td>@principal.details?.Qualifications</td>
                                 <td>
-                                    @if (principal.details?.Documents != null)
+                                    @if (!string.IsNullOrEmpty(principal.details?.Documents))
 
                                     {
-                                        @foreach (var doc in principal.details.Documents)
+
+                                        foreach (var doc in principal.details.Documents.Split(',', StringSplitOptions.RemoveEmptyEntries))
 
                                         {
-                                            <a href="@doc" target="_blank">View</a>
+                                            <a href="@doc.Trim()" target="_blank">View</a>
 
                                             <br />
                                         }
+
                                     }
                                 </td>
                             </tr>
@@ -140,24 +163,26 @@
                                 <td>@teacher.user?.Email</td>
                                 <td>@teacher.details?.Phone</td>
                                 <td>@teacher.details?.Address</td>
-                                <td>@teacher.details?.Salary?.ToString("C")</td>
+                                <td>@teacher.details?.Salary.ToString("C")</td>
                                 <td>@teacher.details?.Dob.ToShortDateString()</td>
                                 <td>@teacher.details?.Experience</td>
                                 <td>@teacher.details?.JoiningDate.ToShortDateString()</td>
-                                <td>@string.Join(", ", teacher.details?.Subjects ?? new List<string>())</td>
-                                <td>@string.Join(", ", teacher.details?.Std ?? new List<int>())</td>
-                                <td>@string.Join(", ", teacher.details?.Qualifications ?? new List<string>())</td>
+                                <td>@teacher.details?.Subjects</td>
+                                <td>@teacher.details?.Stds</td>
+                                <td>@teacher.details?.Qualifications</td>
                                 <td>
-                                    @if (teacher.details?.Documents != null)
+                                    @if (!string.IsNullOrEmpty(teacher.details?.Documents))
 
                                     {
-                                        @foreach (var doc in teacher.details.Documents)
+
+                                        foreach (var doc in teacher.details.Documents.Split(',', StringSplitOptions.RemoveEmptyEntries))
 
                                         {
-                                            <a href="@doc" target="_blank">View</a>
+                                            <a href="@doc.Trim()" target="_blank">View</a>
 
                                             <br />
                                         }
+
                                     }
                                 </td>
                             </tr>
@@ -206,7 +231,7 @@
                                 </td>
                                 <td>@staff.user?.Name</td>
                                 <td>@staff.user?.Email</td>
-                                <td>@staff.details?.Salary?.ToString("C")</td>
+                                <td>@staff.details?.Salary.ToString("C")</td>
                                 <td>@staff.details?.Dob.ToShortDateString()</td>
                                 <td>@staff.details?.Experience</td>
                                 <td>@staff.details?.JoiningDate.ToShortDateString()</td>
@@ -224,3 +249,52 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        var ctx = document.getElementById('salaryPieChart').getContext('2d');
+        var salaryPieChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Principals', 'Teachers', 'Staffs'],
+                datasets: [{
+                    label: 'Salary Distribution',
+                    data: [
+        @principalSalary,
+        @teacherSalary,
+        @staffSalary
+                            ],
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.7)',   // Principals
+                        'rgba(255, 99, 132, 0.7)',   // Teachers
+                        'rgba(255, 206, 86, 0.7)'    // Staffs
+                    ],
+                    borderColor: [
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(255, 206, 86, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Total Salary Distribution'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                let value = context.raw.toLocaleString();
+                                return `${context.label}: ₹${value}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+}
