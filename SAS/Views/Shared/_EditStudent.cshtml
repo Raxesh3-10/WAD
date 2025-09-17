@@ -4,11 +4,11 @@
     <div class="card-body">
         <h5 class="card-title">Edit Student</h5>
 
-        <form asp-action="EditStudent" asp-controller="Student" method="post">
+        <form asp-action="EditStudent" asp-controller="Student" method="post" enctype="multipart/form-data">
             @Html.AntiForgeryToken()
 
             <input type="hidden" asp-for="Id" />
-            <input type="hidden" asp-for="Email" /> <!-- Keep email fixed -->
+            <input type="hidden" asp-for="Email" /> 
 
             <div class="mb-3">
                 <label asp-for="StudentName" class="form-label"></label>
@@ -56,6 +56,19 @@
                 <label asp-for="PhoneNo" class="form-label"></label>
                 <input asp-for="PhoneNo" class="form-control" />
                 <span asp-validation-for="PhoneNo" class="text-danger"></span>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.PhotoUrl))
+            {
+                <div class="mb-3">
+                    <img src="@Model.PhotoUrl" alt="Student Photo" class="img-thumbnail" style="max-height:150px;" />
+                </div>
+            }
+
+            <div class="mb-3">
+                <label asp-for="PhotoFile" class="form-label">Change Photo</label>
+                <input asp-for="PhotoFile" type="file" class="form-control" />
+                <span asp-validation-for="PhotoFile" class="text-danger"></span>
             </div>
 
             <button type="submit" class="btn btn-success">Update</button>

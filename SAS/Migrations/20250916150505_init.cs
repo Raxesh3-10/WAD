@@ -3,22 +3,45 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace SAS.Migrations
 {
-    public partial class Initial : Migration
+    public partial class init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "PreviousStudents",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    StudentName = table.Column<string>(nullable: true),
+                    PhotoUrl = table.Column<string>(nullable: true),
+                    FatherName = table.Column<string>(nullable: true),
+                    MotherName = table.Column<string>(nullable: true),
+                    Email = table.Column<string>(nullable: true),
+                    AadharNo = table.Column<long>(nullable: false),
+                    RollNo = table.Column<int>(nullable: false),
+                    Div = table.Column<string>(nullable: true),
+                    Std = table.Column<int>(nullable: false),
+                    PhoneNo = table.Column<long>(nullable: false),
+                    PassingYear = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PreviousStudents", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Students",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    StudentName = table.Column<string>(nullable: false),
-                    FatherName = table.Column<string>(nullable: false),
-                    MotherName = table.Column<string>(nullable: false),
-                    Email = table.Column<string>(nullable: false),
+                    StudentName = table.Column<string>(nullable: true),
+                    PhotoUrl = table.Column<string>(nullable: true),
+                    FatherName = table.Column<string>(nullable: true),
+                    MotherName = table.Column<string>(nullable: true),
+                    Email = table.Column<string>(nullable: true),
                     AadharNo = table.Column<long>(nullable: false),
                     RollNo = table.Column<int>(nullable: false),
-                    Div = table.Column<string>(nullable: false),
+                    Div = table.Column<string>(nullable: true),
                     Std = table.Column<int>(nullable: false),
                     PhoneNo = table.Column<long>(nullable: false)
                 },
@@ -32,9 +55,9 @@ namespace SAS.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(maxLength: 100, nullable: false),
-                    Email = table.Column<string>(nullable: false),
-                    Password = table.Column<string>(nullable: false),
+                    Name = table.Column<string>(maxLength: 100, nullable: true),
+                    Email = table.Column<string>(nullable: true),
+                    Password = table.Column<string>(nullable: true),
                     Role = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
@@ -47,10 +70,11 @@ namespace SAS.Migrations
                 columns: table => new
                 {
                     NoticeId = table.Column<Guid>(nullable: false),
-                    Subject = table.Column<string>(maxLength: 200, nullable: false),
-                    Message = table.Column<string>(nullable: false),
+                    Subject = table.Column<string>(maxLength: 200, nullable: true),
+                    Message = table.Column<string>(nullable: true),
                     Date = table.Column<DateTime>(nullable: false),
-                    UserId = table.Column<Guid>(nullable: false)
+                    UserId = table.Column<Guid>(nullable: false),
+                    Documents = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -108,6 +132,9 @@ namespace SAS.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Notices");
+
+            migrationBuilder.DropTable(
+                name: "PreviousStudents");
 
             migrationBuilder.DropTable(
                 name: "Students");

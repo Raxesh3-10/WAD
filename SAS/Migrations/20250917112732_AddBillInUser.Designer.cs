@@ -10,8 +10,8 @@ using SAS;
 namespace SAS.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250909115030_Initial")]
-    partial class Initial
+    [Migration("20250917112732_AddBillInUser")]
+    partial class AddBillInUser
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -20,6 +20,31 @@ namespace SAS.Migrations
                 .HasAnnotation("ProductVersion", "3.1.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+            modelBuilder.Entity("SAS.Models.Bill", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("Amount")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime>("BillDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("VendorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VendorId");
+
+                    b.ToTable("Bills");
+                });
 
             modelBuilder.Entity("SAS.Models.Notice", b =>
                 {
@@ -30,12 +55,13 @@ namespace SAS.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Documents")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Message")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Subject")
-                        .IsRequired()
                         .HasColumnType("nvarchar(200)")
                         .HasMaxLength(200);
 
@@ -49,6 +75,50 @@ namespace SAS.Migrations
                     b.ToTable("Notices");
                 });
 
+            modelBuilder.Entity("SAS.Models.PreviousStudent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<long>("AadharNo")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Div")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FatherName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MotherName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PassingYear")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("PhoneNo")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("PhotoUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("RollNo")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Std")
+                        .HasColumnType("int");
+
+                    b.Property<string>("StudentName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PreviousStudents");
+                });
+
             modelBuilder.Entity("SAS.Models.Student", b =>
                 {
                     b.Property<Guid>("Id")
@@ -59,23 +129,22 @@ namespace SAS.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<string>("Div")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FatherName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("MotherName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<long>("PhoneNo")
                         .HasColumnType("bigint");
+
+                    b.Property<string>("PhotoUrl")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("RollNo")
                         .HasColumnType("int");
@@ -84,7 +153,6 @@ namespace SAS.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("StudentName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -99,16 +167,13 @@ namespace SAS.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("nvarchar(100)")
                         .HasMaxLength(100);
 
                     b.Property<string>("Password")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Role")
@@ -167,6 +232,15 @@ namespace SAS.Migrations
                         .IsUnique();
 
                     b.ToTable("UserDetails");
+                });
+
+            modelBuilder.Entity("SAS.Models.Bill", b =>
+                {
+                    b.HasOne("SAS.Models.User", "Vendor")
+                        .WithMany("Bills")
+                        .HasForeignKey("VendorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("SAS.Models.Notice", b =>

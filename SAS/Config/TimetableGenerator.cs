@@ -1,23 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace SAS.Models
+namespace SAS.Config
 {
     public class Slot
     {
         public string Start { get; set; } = string.Empty;
         public string End { get; set; } = string.Empty;
         public string Subject { get; set; } = string.Empty;
-        public string? Teacher { get; set; }
+        public string Teacher { get; set; }
     }
 
     public class TimetableGenerator
     {
-        private readonly int _lectureDuration; // in minutes
+        private readonly int _lectureDuration;
         private readonly TimeSpan _startTime;
         private readonly TimeSpan _endTime;
         private readonly TimeSpan _lunchStart;
-        private readonly int _lunchDuration; // in minutes
+        private readonly int _lunchDuration;
         private readonly int _daysInWeek;
         private readonly List<string> _subjects;
 

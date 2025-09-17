@@ -5,18 +5,21 @@ using SAS.Repositories;
 using SAS.ViewModels;
 using AutoMapper;
 using System.Linq;
+using System;
 
 namespace SAS.Controllers
 {
     public class StudentController : Controller
     {
-        private readonly IRepository<Student> _studentRepo;
+        private readonly IStudentRepository _studentRepo;
+        private readonly IPreviousStudentRepository _previousStudentRepo;
         private readonly IMapper _mapper;
 
-        public StudentController(IRepository<Student> studentRepo, IMapper mapper)
+        public StudentController(IStudentRepository studentRepo, IPreviousStudentRepository previousStudentRepo,IMapper mapper)
         {
             _studentRepo = studentRepo;
             _mapper = mapper;
+            _previousStudentRepo = previousStudentRepo;
         }
 
         [HttpPost]
@@ -27,7 +30,7 @@ namespace SAS.Controllers
             if (!ModelState.IsValid) return View("CreateStudent", studentVm);
 
             var student = _mapper.Map<Student>(studentVm);
-            _studentRepo.Add(student);
+            _studentRepo.Add(student, studentVm.PhotoFile);
 
             TempData["SuccessMessage"] = "Student created successfully.";
             return RedirectToRoleDashboard();
@@ -40,7 +43,7 @@ namespace SAS.Controllers
             if (!ModelState.IsValid) return View(studentVm);
 
             var updatedStudent = _mapper.Map<Student>(studentVm);
-            _studentRepo.Update(studentVm.Email, updatedStudent);
+            _studentRepo.Update(studentVm.Email, updatedStudent, studentVm.PhotoFile);
 
             TempData["SuccessMessage"] = "Student updated successfully.";
             return RedirectToRoleDashboard();
@@ -80,8 +83,49 @@ namespace SAS.Controllers
 
             return View(studentVms);
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult PromoteStudents()
+        {
+            if (!IsAuthorized("principal")) return HandleUnauthorized();
 
-        // ---------- Helpers ----------
+            var currentYear = DateTime.Now.Month >= 6
+                ? $"{DateTime.Now.Year}-{DateTime.Now.Year + 1}"
+                : $"{DateTime.Now.Year - 1}-{DateTime.Now.Year}";
+
+            var students = _studentRepo.GetAll().ToList();
+
+            foreach (var student in students)
+            {
+                var prevStudent = new PreviousStudent
+                {
+                    Id = Guid.NewGuid(),
+                    StudentName = student.StudentName,
+                    PhotoUrl = student.PhotoUrl,
+                    FatherName = student.FatherName,
+                    MotherName = student.MotherName,
+                    Email = student.Email,
+                    AadharNo = student.AadharNo,
+                    RollNo = student.RollNo,
+                    Div = student.Div,
+                    Std = student.Std,
+                    PhoneNo = student.PhoneNo,
+                    PassingYear = currentYear
+                };
+                _previousStudentRepo.Add(prevStudent);
+                student.Std++;
+
+                if (student.Std > 12)
+                {
+                    _studentRepo.Delete(student.Email);
+                }
+                else
+                {
+                    _studentRepo.Update(student.Email, student, null);
+                }
+            }
+            return RedirectToRoleDashboard();
+        }
         private bool IsAuthorized(params string[] allowedRoles)
         {
             var role = HttpContext.Session.GetString("UserRole");
@@ -91,7 +135,7 @@ namespace SAS.Controllers
         private IActionResult HandleUnauthorized()
         {
             HttpContext.Session.Clear();
-            return RedirectToAction("Login", "User"); // ensure this matches your Login controller
+            return RedirectToAction("Login", "User");
         }
 
         private IActionResult RedirectToRoleDashboard()

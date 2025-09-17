@@ -10,16 +10,16 @@ namespace SAS.ViewComponents
 {
     public class NoticeReadonlyViewComponent : ViewComponent
     {
-        private readonly IRepository<Notice> _noticeRepo;
+        private readonly INoticeRepository _noticeRepo;
         private readonly IMapper _mapper;
 
-        public NoticeReadonlyViewComponent(IRepository<Notice> noticeRepo, IMapper mapper)
+        public NoticeReadonlyViewComponent(INoticeRepository noticeRepo, IMapper mapper)
         {
             _noticeRepo = noticeRepo;
             _mapper = mapper;
         }
 
-        public async Task<IViewComponentResult> InvokeAsync()
+        public IViewComponentResult Invoke()
         {
             var notices = _noticeRepo.GetAll().ToList();
             var noticeVms = notices.Select(n => _mapper.Map<NoticeViewModel>(n)).ToList();

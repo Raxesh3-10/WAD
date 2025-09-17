@@ -18,7 +18,6 @@ namespace SAS.Repositories
         public IEnumerable<User> GetAll()
         {
             return _context.Users
-                .Include(u => u.Notices)
                 .Include(u => u.UserDetails)
                 .ToList();
         }
@@ -26,9 +25,15 @@ namespace SAS.Repositories
         public User? GetByEmail(string email)
         {
             return _context.Users
-                .Include(u => u.Notices)
                 .Include(u => u.UserDetails)
                 .FirstOrDefault(u => u.Email == email);
+        }
+
+        public User? GetById(Guid id)
+        {
+            return _context.Users
+                .Include(u => u.UserDetails)
+                .FirstOrDefault(u => u.Id == id);
         }
 
         public void Add(User user)
@@ -44,7 +49,6 @@ namespace SAS.Repositories
         public bool Update(string email, User updatedUser)
         {
             var existing = _context.Users
-                .Include(u => u.Notices)
                 .Include(u => u.UserDetails)
                 .FirstOrDefault(u => u.Email == email);
 
@@ -52,11 +56,21 @@ namespace SAS.Repositories
 
             updatedUser.Id = existing.Id;
 
-            if (!string.IsNullOrEmpty(updatedUser.Password) &&
-                !BCrypt.Net.BCrypt.Verify(updatedUser.Password, existing.Password))
-                updatedUser.Password = updatedUser.GetHashedPassword();
+            if (!string.IsNullOrEmpty(updatedUser.Password))
+            {
+                if (!BCrypt.Net.BCrypt.Verify(updatedUser.Password, existing.Password))
+                {
+                    updatedUser.Password = updatedUser.GetHashedPassword();
+                }
+                else
+                {
+                    updatedUser.Password = existing.Password;
+                }
+            }
             else
+            {
                 updatedUser.Password = existing.Password;
+            }
 
             _context.Entry(existing).CurrentValues.SetValues(updatedUser);
             _context.SaveChanges();
@@ -65,7 +79,10 @@ namespace SAS.Repositories
 
         public bool Delete(string email)
         {
-            var user = _context.Users.FirstOrDefault(u => u.Email == email);
+            var user = _context.Users
+                .Include(u => u.UserDetails)
+                .FirstOrDefault(u => u.Email == email);
+
             if (user == null) return false;
 
             _context.Users.Remove(user);

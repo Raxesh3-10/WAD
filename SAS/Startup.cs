@@ -25,10 +25,8 @@ namespace SAS
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // Bind Cloudinary settings from appsettings.json
             var cloudinarySettings = Configuration.GetSection("Cloudinary").Get<CloudinarySettings>();
 
             var account = new Account(
@@ -39,43 +37,34 @@ namespace SAS
 
             var cloudinary = new Cloudinary(account);
 
-            // Register as singleton
             services.AddSingleton(cloudinary);
 
             services.AddAutoMapper(typeof(Helper));
 
-            // Enable MVC
             services.AddControllersWithViews();
 
-            // Enable SQL Server DB context
             services.AddDbContextPool<AppDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("UniCon")));
 
-            // Register Repositories
-            services.AddScoped<IRepository<Student>, SQLStudentRepository>();
+            services.AddScoped<IStudentRepository, SQLStudentRepository>();
             services.AddScoped<IRepository<User>, SQLUserRepository>();
-            services.AddScoped<IRepository<Notice>, SQLNoticeRepository>();
+            services.AddScoped<INoticeRepository, SQLNoticeRepository>();
             services.AddScoped<IUserDetailsRepository,SQLUserDetailsRepository>();
-
-            // Email service
+            services.AddScoped<IPreviousStudentRepository, SQLPreviousStudentRepository>();
+            services.AddScoped<IBillRepository, SQLBillRepository>();
+            services.AddScoped<CloudinaryService>();
+            services.AddHttpClient<IdCardService>();
             services.AddTransient<MailService>();
 
-            // Enable HttpContextAccessor
             services.AddHttpContextAccessor();
 
-            // Enable Session with optional settings
             services.AddSession(options =>
             {
                 options.IdleTimeout = TimeSpan.FromMinutes(10);
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });
-
-            // If using authentication, add it here
-            // services.AddAuthentication(...);
         }
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -93,10 +82,7 @@ namespace SAS
 
             app.UseRouting();
 
-            app.UseSession(); // Should come after UseRouting
-
-            // If using authentication
-            // app.UseAuthentication();
+            app.UseSession(); 
 
             app.UseAuthorization();
 

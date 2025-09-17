@@ -24,9 +24,26 @@
     </div>
 
     @await Component.InvokeAsync("Notice")
+    @await Component.InvokeAsync("BillsList")
     @await Component.InvokeAsync("Student")
-    @await Component.InvokeAsync("ReportBug", new { name = profile?.Name, email = profile?.Email })
     @await Component.InvokeAsync("Timetable")
+    @await Component.InvokeAsync("ReportBug", new { name = profile?.Name, email = profile?.Email })
+
+    <div class="container mb-4">
+        <!-- Download All Student ID Cards -->
+        <form asp-controller="Principal" asp-action="GenerateAllStudentIdCards" method="post" style="display:inline;">
+            <button type="submit" class="btn btn-success">
+                Download All Student ID Cards
+            </button>
+        </form>
+
+        <!-- Download All Users ID Cards -->
+        <form asp-controller="Principal" asp-action="GenerateAllUserIdCards" method="post" style="display:inline;">
+            <button type="submit" class="btn btn-primary">
+                Download All Teachers-Principal-Staffs ID Cards
+            </button>
+        </form>
+    </div>
 
     <!-- Teachers Section -->
     <div class="card mt-4">

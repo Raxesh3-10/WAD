@@ -3,12 +3,10 @@
 
 <div class="card shadow-sm mb-4" id="student-component">
     <div class="tab-content">
-        <!-- Create Student -->
         <div class="tab-pane fade show active p-3">
             @await Html.PartialAsync("_CreateStudent", new SAS.ViewModels.StudentViewModel())
         </div>
 
-        <!-- View Students -->
         <div class="tab-pane fade show active p-3">
             @if (Model == null || !Model.Any())
             {
@@ -18,6 +16,8 @@
             {
 
                 var stdOptions = Model.Select(s => s.Std).Distinct().OrderBy(x => x).ToList();
+
+
 
                 var grouped = Model
 
@@ -56,12 +56,19 @@
                     </select>
                 </div>
 
+                <div class="d-flex justify-content-end mb-3">
+                    <form asp-controller="Student" asp-action="PromoteStudents" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-success">
+                            New Year : Storing Students' records
+                        </button>
+                    </form>
+                </div>
+
                 <div id="studentList"></div>
                 <div id="editStudentContainer" class="mt-4"></div>
 
                 <script>
                     const grouped = @Html.Raw(groupedJson);
-
                     const stdSelect = document.getElementById("stdSelect");
                     const divContainer = document.getElementById("divContainer");
                     const divSelect = document.getElementById("divSelect");
@@ -100,20 +107,24 @@
                             grouped[std][div].forEach(student => {
                                 const li = document.createElement("li");
                                 li.className = "list-group-item d-flex justify-content-between align-items-center";
+
                                 li.innerHTML = `
-                                    <span>${student.StudentName} (Roll ${student.RollNo})</span>
-                                    <div>
-                                        <button type="button"
-                                                class="btn btn-sm btn-outline-primary me-2 edit-student-btn"
-                                                data-email="${student.Email}">
-                                            Edit
-                                        </button>
-                                        <form action="/Student/DeleteStudentConfirmed" method="post" class="d-inline">
-                                            <input type="hidden" name="email" value="${student.Email}" />
-                                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-                                        </form>
-                                    </div>
-                                `;
+                                                        <div class="d-flex align-items-center">
+                                                            ${student.PhotoUrl ? `<img src="${student.PhotoUrl}" class="img-thumbnail me-2" style="width:50px;height:50px;">` : ''}
+                                                            <span>${student.StudentName} (Roll ${student.RollNo})</span>
+                                                        </div>
+                                                        <div>
+                                                            <button type="button"
+                                                                    class="btn btn-sm btn-outline-primary me-2 edit-student-btn"
+                                                                    data-email="${student.Email}">
+                                                                Edit
+                                                            </button>
+                                                            <form action="/Student/DeleteStudentConfirmed" method="post" class="d-inline">
+                                                                <input type="hidden" name="email" value="${student.Email}" />
+                                                                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                                            </form>
+                                                        </div>
+                                                    `;
                                 ul.appendChild(li);
                             });
 
@@ -121,7 +132,6 @@
                         }
                     });
 
-                    // Event delegation for Edit button
                     document.addEventListener("click", function (e) {
                         if (e.target && e.target.classList.contains("edit-student-btn")) {
                             const email = e.target.getAttribute("data-email");
@@ -130,11 +140,11 @@
                                 method: "GET",
                                 headers: { "X-Requested-With": "XMLHttpRequest" }
                             })
-                            .then(response => response.text())
-                            .then(html => {
-                                document.getElementById("editStudentContainer").innerHTML = html;
-                            })
-                            .catch(err => console.error("Error loading edit form:", err));
+                                .then(response => response.text())
+                                .then(html => {
+                                    document.getElementById("editStudentContainer").innerHTML = html;
+                                })
+                                .catch(err => console.error("Error loading edit form:", err));
                         }
                     });
                 </script>

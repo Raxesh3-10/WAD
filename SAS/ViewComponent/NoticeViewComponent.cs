@@ -9,10 +9,10 @@ namespace SAS.ViewComponents
 {
     public class NoticeViewComponent : ViewComponent
     {
-        private readonly IRepository<Notice> _noticeRepo;
+        private readonly INoticeRepository _noticeRepo;
         private readonly IMapper _mapper;
 
-        public NoticeViewComponent(IRepository<Notice> noticeRepo, IMapper mapper)
+        public NoticeViewComponent(INoticeRepository noticeRepo, IMapper mapper)
         {
             _noticeRepo = noticeRepo;
             _mapper = mapper;
@@ -22,7 +22,7 @@ namespace SAS.ViewComponents
         {
             var notices = _noticeRepo.GetAll().ToList();
             var noticeVms = notices.Select(n => _mapper.Map<NoticeViewModel>(n)).ToList();
-            return View(noticeVms); // Views/Shared/Components/Notice/Default.cshtml
+            return View(noticeVms);
         }
     }
 }

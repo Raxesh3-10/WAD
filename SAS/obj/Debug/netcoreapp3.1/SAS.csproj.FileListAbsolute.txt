@@ -229,3 +229,8 @@ C:\Users\gotur\OneDrive\Documents\SAS\SAS\obj\Debug\netcoreapp3.1\Razor\Views\Sh
 C:\Users\gotur\OneDrive\Documents\SAS\SAS\obj\Debug\netcoreapp3.1\Razor\Views\Shared\_CreateStudent.cshtml.g.cs
 C:\Users\gotur\OneDrive\Documents\SAS\SAS\obj\Debug\netcoreapp3.1\Razor\Views\Shared\_EditNotice.cshtml.g.cs
 C:\Users\gotur\OneDrive\Documents\SAS\SAS\obj\Debug\netcoreapp3.1\Razor\Views\Shared\_EditStudent.cshtml.g.cs
+C:\Users\gotur\OneDrive\Documents\SAS\SAS\obj\Debug\netcoreapp3.1\Razor\Views\PreviousStudent\Index.cshtml.g.cs
+C:\Users\gotur\OneDrive\Documents\SAS\SAS\obj\Debug\netcoreapp3.1\Razor\Views\Shared\_PrincipalNavbar.cshtml.g.cs
+C:\Users\gotur\OneDrive\Documents\SAS\SAS\obj\Debug\netcoreapp3.1\Razor\Views\Shared\Components\BillsList\Default.cshtml.g.cs
+C:\Users\gotur\OneDrive\Documents\SAS\SAS\obj\Debug\netcoreapp3.1\Razor\Views\Shared\_CreateBill.cshtml.g.cs
+C:\Users\gotur\OneDrive\Documents\SAS\SAS\obj\Debug\netcoreapp3.1\Razor\Views\Shared\_EditBill.cshtml.g.cs

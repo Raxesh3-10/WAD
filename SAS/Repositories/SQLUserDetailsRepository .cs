@@ -1,73 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using CloudinaryDotNet;
-using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Http;
 using SAS.Models;
+using SAS.Services;
 
 namespace SAS.Repositories
 {
     public class SQLUserDetailsRepository : IUserDetailsRepository
     {
         private readonly AppDbContext _context;
-        private readonly Cloudinary _cloudinary;
+        private readonly CloudinaryService _cloudinaryService;
 
-        public SQLUserDetailsRepository(AppDbContext context, Cloudinary cloudinary)
+        public SQLUserDetailsRepository(AppDbContext context, CloudinaryService cloudinaryService)
         {
             _context = context;
-            _cloudinary = cloudinary;
+            _cloudinaryService = cloudinaryService;
         }
-
-        #region Cloudinary Helpers
-        private string UploadImage(IFormFile file, string folder)
-        {
-            using var stream = file.OpenReadStream();
-            var uploadParams = new ImageUploadParams
-            {
-                File = new FileDescription(file.FileName, stream),
-                Folder = folder
-            };
-            var result = _cloudinary.Upload(uploadParams);
-            return result.SecureUrl?.ToString() ?? string.Empty;
-        }
-
-        private string UploadFile(IFormFile file, string folder)
-        {
-            using var stream = file.OpenReadStream();
-            var uploadParams = new RawUploadParams
-            {
-                File = new FileDescription(file.FileName, stream),
-                Folder = folder
-            };
-            var result = _cloudinary.Upload(uploadParams);
-            return result.SecureUrl?.ToString() ?? string.Empty;
-        }
-
-        private void DeleteFromCloudinary(string url, bool isImage)
-        {
-            if (string.IsNullOrEmpty(url)) return;
-
-            try
-            {
-                var parts = url.Split('/');
-                var filename = parts[^1].Split('.')[0];
-                var folderIndex = Array.IndexOf(parts, "upload") + 1;
-                var folder = folderIndex > 0 ? string.Join("/", parts[folderIndex..^1]) : string.Empty;
-
-                var publicId = string.IsNullOrEmpty(folder) ? filename : $"{folder}/{filename}";
-                _cloudinary.Destroy(new DeletionParams(publicId)
-                {
-                    ResourceType = isImage ? ResourceType.Image : ResourceType.Raw
-                });
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error deleting from Cloudinary: " + ex.Message);
-            }
-        }
-        #endregion
 
         public IEnumerable<UserDetails> GetAll()
         {
@@ -108,16 +57,14 @@ namespace SAS.Repositories
             var existing = GetByUserId(userId);
             if (existing == null) return false;
 
-            // --- Handle Photo ---
             if (photo != null)
             {
                 if (!string.IsNullOrEmpty(existing.Photo))
-                    DeleteFromCloudinary(existing.Photo, true);
+                    _cloudinaryService.DeleteFromCloudinary(existing.Photo, true);
 
-                existing.Photo = UploadImage(photo, "photos");
+                existing.Photo = _cloudinaryService.UploadImage(photo, "photos");
             }
 
-            // --- Handle Documents ---
             var docsList = string.IsNullOrWhiteSpace(existing.Documents)
                 ? new List<string>()
                 : existing.Documents.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(d => d.Trim()).ToList();
@@ -128,7 +75,7 @@ namespace SAS.Repositories
                 {
                     if (index >= 0 && index < docsList.Count)
                     {
-                        DeleteFromCloudinary(docsList[index], false);
+                        _cloudinaryService.DeleteFromCloudinary(docsList[index], false);
                         docsList.RemoveAt(index);
                     }
                 }
@@ -138,7 +85,7 @@ namespace SAS.Repositories
             {
                 foreach (var doc in documents)
                 {
-                    var url = UploadFile(doc, "documents");
+                    var url = _cloudinaryService.UploadFile(doc, "documents");
                     if (!string.IsNullOrEmpty(url))
                         docsList.Add(url);
                 }
@@ -146,7 +93,6 @@ namespace SAS.Repositories
 
             existing.Documents = string.Join(", ", docsList);
 
-            // --- Update simple fields ---
             existing.Subjects = updatedDetails.Subjects;
             existing.Stds = updatedDetails.Stds;
             existing.Qualifications = updatedDetails.Qualifications;
@@ -168,12 +114,12 @@ namespace SAS.Repositories
             if (existing == null) return false;
 
             if (!string.IsNullOrEmpty(existing.Photo))
-                DeleteFromCloudinary(existing.Photo, true);
+                _cloudinaryService.DeleteFromCloudinary(existing.Photo, true);
 
             if (!string.IsNullOrEmpty(existing.Documents))
             {
                 foreach (var doc in existing.Documents.Split(',', StringSplitOptions.RemoveEmptyEntries))
-                    DeleteFromCloudinary(doc.Trim(), false);
+                    _cloudinaryService.DeleteFromCloudinary(doc.Trim(), false);
             }
 
             _context.UserDetails.Remove(existing);

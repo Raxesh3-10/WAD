@@ -30,6 +30,12 @@
         @await Html.PartialAsync("_TrusteeNavbar")
     }
 
+    else if (userRole != null && userRole.ToLower() == "principal")
+
+    {
+        @await Html.PartialAsync("_PrincipalNavbar")
+    }
+
     else
 
     {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace SAS.ViewModels
@@ -39,5 +40,10 @@ namespace SAS.ViewModels
         [Required(ErrorMessage = "Phone number is required.")]
         [Range(1000000000, 9999999999, ErrorMessage = "Phone number must be 10 digits and cannot start with 0.")]
         public long PhoneNo { get; set; }
+
+        public string? PhotoUrl { get; set; }
+
+        public IFormFile? PhotoFile { get; set; }
+
     }
 }

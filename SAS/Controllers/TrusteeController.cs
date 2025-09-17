@@ -39,7 +39,6 @@ namespace SAS.Controllers
             ViewBag.Principals = principals.Select(p => BuildUserDetailsVM(p)).ToList();
             ViewBag.Staffs = staffs.Select(s => BuildUserDetailsVM(s)).ToList();
 
-            // --- Salary Totals ---
             var teacherSalaries = teachers
                 .Select(t => _userDetailsRepo.GetByUserId(t.Id)?.Salary ?? 0)
                 .Sum();

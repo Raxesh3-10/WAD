@@ -1,6 +1,6 @@
 ﻿@model SAS.ViewModels.NoticeViewModel
 
-<form asp-action="EditNotice" asp-controller="Notice" method="post" class="row g-3">
+<form asp-action="EditNotice" asp-controller="Notice" method="post" enctype="multipart/form-data" class="row g-3">
     @Html.AntiForgeryToken()
     <input type="hidden" asp-for="NoticeId" />
 
@@ -15,8 +15,34 @@
     </div>
 
     <div class="col-md-4">
-        <input asp-for="Date" class="form-control" type="date" />
+        <input asp-for="Date" class="form-control" type="date"
+               value="@Model.Date.ToString("yyyy-MM-dd")" />
         <span asp-validation-for="Date" class="text-danger"></span>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.Documents))
+
+    {
+
+        var docs = Model.Documents.Split(',', StringSplitOptions.RemoveEmptyEntries);
+        <div class="col-12">
+            <label class="form-label">Existing Documents</label>
+            <div class="d-flex flex-wrap gap-2">
+                @for (int i = 0; i < docs.Length; i++)
+
+                {
+                    <div class="border p-2 rounded small d-flex align-items-center">
+                        <a href="@docs[i]" target="_blank" class="me-2">Doc @(i + 1)</a>
+                        <input type="checkbox" name="RemoveDocIndexes" value="@i" /> Remove
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <div class="col-12">
+        <label class="form-label">Upload New Documents</label>
+        <input asp-for="NewDocuments" type="file" multiple class="form-control" />
     </div>
 
     <div class="col-12">

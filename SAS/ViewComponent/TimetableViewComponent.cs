@@ -15,7 +15,7 @@ namespace SAS.ViewComponents
             {
                 Stds = Enumerable.Range(1, 12).ToList(),
                 DaysInWeek = 5,
-                LectureDuration = 45,
+                LectureDuration = 60,
                 StartTime = new TimeSpan(9, 0, 0),
                 EndTime = new TimeSpan(15, 0, 0),
                 LunchStart = new TimeSpan(12, 0, 0),

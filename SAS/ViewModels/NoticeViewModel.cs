@@ -1,11 +1,13 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace SAS.ViewModels
 {
     public class NoticeViewModel
     {
-        public Guid NoticeId { get; set; }  // Needed for Edit form (hidden input)
+        public Guid NoticeId { get; set; }
 
         [Required(ErrorMessage = "'Subject' is required.")]
         [StringLength(200)]
@@ -19,5 +21,9 @@ namespace SAS.ViewModels
         public DateTime Date { get; set; }
 
         public Guid UserId { get; set; }
+
+        public string? Documents { get; set; }
+        public List<IFormFile>? NewDocuments { get; set; }
+        public List<int>? RemoveDocIndexes { get; set; } = new List<int>();
     }
 }

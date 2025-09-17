@@ -9,10 +9,10 @@ namespace SAS.ViewComponents
 {
     public class StudentViewComponent : ViewComponent
     {
-        private readonly IRepository<Student> _studentRepo;
+        private readonly IStudentRepository _studentRepo;
         private readonly IMapper _mapper;
 
-        public StudentViewComponent(IRepository<Student> studentRepo, IMapper mapper)
+        public StudentViewComponent(IStudentRepository studentRepo, IMapper mapper)
         {
             _studentRepo = studentRepo;
             _mapper = mapper;

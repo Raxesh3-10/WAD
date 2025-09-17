@@ -12,5 +12,6 @@
     </div>
 
     @await Component.InvokeAsync("NoticeReadonly")
+    @await Component.InvokeAsync("BillsList")
     @await Component.InvokeAsync("ReportBug", new { name = profile?.Name, email = profile?.Email })
 </div>

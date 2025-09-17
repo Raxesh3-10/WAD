@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace SAS.Repositories
 {
@@ -6,6 +7,7 @@ namespace SAS.Repositories
     {
         IEnumerable<T> GetAll();
         T GetByEmail(string email);
+        T GetById(Guid id); 
         void Add(T entity);
         bool Update(string email, T entity);
         bool Delete(string email);

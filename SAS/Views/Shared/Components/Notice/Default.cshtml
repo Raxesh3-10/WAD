@@ -6,12 +6,10 @@
             <h4 class="card-title">Notices</h4>
         </div>
 
-        <!-- Create Notice Form -->
         <div class="mb-4">
             @await Html.PartialAsync("_CreateNotice", new SAS.ViewModels.NoticeViewModel())
         </div>
 
-        <!-- Notices List -->
         @if (Model == null || !Model.Any())
 
         {
@@ -30,15 +28,29 @@
                             <strong>@n.Subject</strong><br />
                             <span>@n.Message</span><br />
                             <small>Date: @n.Date.ToShortDateString()</small>
+
+                            @if (!string.IsNullOrEmpty(n.Documents))
+                            {
+
+                                var docs = n.Documents.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                                <div class="mt-2 d-flex flex-wrap gap-2">
+                                    @for (int i = 0; i < docs.Length; i++)
+                                    {
+                                        <a href="@docs[i]" target="_blank"
+                                           class="badge bg-light text-primary border rounded px-2 py-1 text-decoration-none">
+                                            Document @(i + 1)
+                                        </a>
+                                    }
+                                </div>
+                            }
                         </div>
+
                         <div>
-                            <!-- Edit Button -->
                             <button type="button" class="btn btn-sm btn-outline-primary me-2"
                                     onclick="showEditForm('@n.NoticeId', '@n.Subject', '@n.Message', '@n.Date.ToString("yyyy-MM-dd")')">
                                 Edit
                             </button>
 
-                            <!-- Delete Form -->
                             <form asp-action="DeleteNotice" asp-controller="Notice" method="post" class="d-inline">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="id" value="@n.NoticeId" />
@@ -50,7 +62,6 @@
             </ul>
         }
 
-        <!-- Edit Notice Form (hidden initially) -->
         <div id="editNoticeFormContainer" style="display:none;" class="mt-4">
             @await Html.PartialAsync("_EditNotice", new SAS.ViewModels.NoticeViewModel())
         </div>
@@ -58,13 +69,13 @@
 </div>
 
 <script>
-        function showEditForm(id, subject, message, date) {
+    function showEditForm(id, subject, message, date) {
         document.querySelector('#editNoticeFormContainer input[name="NoticeId"]').value = id;
         document.querySelector('#editNoticeFormContainer input[name="Subject"]').value = subject;
         document.querySelector('#editNoticeFormContainer textarea[name="Message"]').value = message;
         document.querySelector('#editNoticeFormContainer input[name="Date"]').value = date;
 
-    document.getElementById('editNoticeFormContainer').style.display = 'block';
-    document.getElementById('editNoticeFormContainer').scrollIntoView({ behavior: 'smooth' });
+        document.getElementById('editNoticeFormContainer').style.display = 'block';
+        document.getElementById('editNoticeFormContainer').scrollIntoView({ behavior: 'smooth' });
     }
 </script>

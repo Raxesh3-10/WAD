@@ -15,6 +15,7 @@ namespace SAS
         public static void Main(string[] args)
         {
             QuestPDF.Settings.License = LicenseType.Community;
+            QuestPDF.Settings.EnableDebugging = true;
             CreateHostBuilder(args).Build().Run();
         }
 

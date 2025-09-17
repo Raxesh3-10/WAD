@@ -13,6 +13,8 @@ namespace SAS.Mappers
             CreateMap<Student, StudentViewModel>().ReverseMap();
             CreateMap<UserDetails, UserDetailsViewModel>().ReverseMap();
             CreateMap<User, UserViewModel>().ReverseMap();
+            CreateMap<PreviousStudent,PreviousStudentViewModel>().ReverseMap();
+            CreateMap<BillViewModel, Bill>().ReverseMap();
         }
     }
 }

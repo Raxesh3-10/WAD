@@ -1,6 +1,6 @@
 ﻿@model SAS.ViewModels.NoticeViewModel
 
-<form asp-action="CreateNotice" asp-controller="Notice" method="post" class="row g-3">
+<form asp-action="CreateNotice" asp-controller="Notice" method="post" enctype="multipart/form-data" class="row g-3">
     @Html.AntiForgeryToken()
     <input type="hidden" asp-for="NoticeId" />
 
@@ -15,8 +15,14 @@
     </div>
 
     <div class="col-md-4">
-        <input asp-for="Date" class="form-control" type="date" value="@Model?.Date.ToString("yyyy-MM-dd") ?? DateTime.Today.ToString(" yyyy-MM-dd")" />
+        <input asp-for="Date" class="form-control" type="date"
+               value="@Model?.Date.ToString("yyyy-MM-dd") ?? DateTime.Today.ToString(" yyyy-MM-dd")" />
         <span asp-validation-for="Date" class="text-danger"></span>
+    </div>
+
+    <div class="col-12">
+        <label class="form-label">Upload Documents</label>
+        <input asp-for="NewDocuments" type="file" multiple class="form-control" />
     </div>
 
     <div class="col-12">

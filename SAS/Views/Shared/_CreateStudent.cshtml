@@ -1,6 +1,6 @@
 ﻿@model SAS.ViewModels.StudentViewModel
 
-<form asp-action="CreateStudent" asp-controller="Student" method="post" id="create-student-form" class="row g-3">
+<form asp-action="CreateStudent" asp-controller="Student" method="post" enctype="multipart/form-data" class="row g-3">
     @Html.AntiForgeryToken()
 
     <div asp-validation-summary="All" class="text-danger mb-2"></div>
@@ -57,6 +57,12 @@
         <label asp-for="PhoneNo" class="form-label"></label>
         <input asp-for="PhoneNo" class="form-control" placeholder="Phone No" />
         <span asp-validation-for="PhoneNo" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-6">
+        <label asp-for="PhotoFile" class="form-label">Upload Photo</label>
+        <input asp-for="PhotoFile" type="file" class="form-control" />
+        <span asp-validation-for="PhotoFile" class="text-danger"></span>
     </div>
 
     <div class="col-12">
