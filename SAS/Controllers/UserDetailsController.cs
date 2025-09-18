@@ -78,7 +78,6 @@ namespace SAS.Controllers
                 return View("Details", updatedDetails);
             }
 
-            // Map VM -> Entity (simple string fields). Repository handles files/uploads.
             existing.Subjects = updatedDetails.Subjects ?? string.Empty;
             existing.Stds = updatedDetails.Stds ?? string.Empty;
             existing.Qualifications = updatedDetails.Qualifications ?? string.Empty;
@@ -89,7 +88,6 @@ namespace SAS.Controllers
             existing.Address = updatedDetails.Address ?? string.Empty;
             existing.Phone = updatedDetails.Phone ?? string.Empty;
 
-            // Call repository to handle DB update + Cloudinary (photo/doc uploads & removals)
             var success = _repository.UpdateDetails(
                 userId.Value,
                 existing,
@@ -100,7 +98,6 @@ namespace SAS.Controllers
 
             ViewBag.StatusMsg = success ? "Details updated successfully" : "Failed to update user details";
 
-            // Re-fetch fresh entity (so vm contains uploaded photo/doc URLs)
             var refreshed = _repository.GetByUserId(userId.Value) ?? existing;
             var vm = _mapper.Map<UserDetailsViewModel>(refreshed);
             ViewData["EditMode"] = false;

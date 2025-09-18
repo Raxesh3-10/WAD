@@ -16,7 +16,7 @@ namespace SAS.Migrations
                     PhotoUrl = table.Column<string>(nullable: true),
                     FatherName = table.Column<string>(nullable: true),
                     MotherName = table.Column<string>(nullable: true),
-                    Email = table.Column<string>(nullable: true),
+                    Email = table.Column<string>(nullable: false),
                     AadharNo = table.Column<long>(nullable: false),
                     RollNo = table.Column<int>(nullable: false),
                     Div = table.Column<string>(nullable: true),
@@ -38,7 +38,7 @@ namespace SAS.Migrations
                     PhotoUrl = table.Column<string>(nullable: true),
                     FatherName = table.Column<string>(nullable: true),
                     MotherName = table.Column<string>(nullable: true),
-                    Email = table.Column<string>(nullable: true),
+                    Email = table.Column<string>(nullable: false),
                     AadharNo = table.Column<long>(nullable: false),
                     RollNo = table.Column<int>(nullable: false),
                     Div = table.Column<string>(nullable: true),
@@ -55,7 +55,7 @@ namespace SAS.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(maxLength: 100, nullable: true),
+                    Name = table.Column<string>(nullable: true),
                     Email = table.Column<string>(nullable: true),
                     Password = table.Column<string>(nullable: true),
                     Role = table.Column<int>(nullable: false)
@@ -63,6 +63,30 @@ namespace SAS.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Bills",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(nullable: false),
+                    Type = table.Column<int>(nullable: false),
+                    Amount = table.Column<double>(nullable: false),
+                    BillDate = table.Column<DateTime>(nullable: false),
+                    Documents = table.Column<string>(nullable: true),
+                    VendorName = table.Column<string>(nullable: true),
+                    VendorEmail = table.Column<string>(nullable: true),
+                    UserId = table.Column<Guid>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Bills", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Bills_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -117,9 +141,20 @@ namespace SAS.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Bills_UserId",
+                table: "Bills",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Notices_UserId",
                 table: "Notices",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Students_Email",
+                table: "Students",
+                column: "Email",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserDetails_UserId",
@@ -130,6 +165,9 @@ namespace SAS.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "Bills");
+
             migrationBuilder.DropTable(
                 name: "Notices");
 

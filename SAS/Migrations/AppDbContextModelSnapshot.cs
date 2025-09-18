@@ -31,6 +31,9 @@ namespace SAS.Migrations
                     b.Property<DateTime>("BillDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Documents")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("Type")
                         .HasColumnType("int");
 

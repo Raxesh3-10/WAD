@@ -15,7 +15,7 @@ namespace SAS.Controllers
         private readonly IPreviousStudentRepository _previousStudentRepo;
         private readonly IMapper _mapper;
 
-        public StudentController(IStudentRepository studentRepo, IPreviousStudentRepository previousStudentRepo,IMapper mapper)
+        public StudentController(IStudentRepository studentRepo, IPreviousStudentRepository previousStudentRepo, IMapper mapper)
         {
             _studentRepo = studentRepo;
             _mapper = mapper;
@@ -32,7 +32,6 @@ namespace SAS.Controllers
             var student = _mapper.Map<Student>(studentVm);
             _studentRepo.Add(student, studentVm.PhotoFile);
 
-            TempData["SuccessMessage"] = "Student created successfully.";
             return RedirectToRoleDashboard();
         }
 
@@ -45,7 +44,6 @@ namespace SAS.Controllers
             var updatedStudent = _mapper.Map<Student>(studentVm);
             _studentRepo.Update(studentVm.Email, updatedStudent, studentVm.PhotoFile);
 
-            TempData["SuccessMessage"] = "Student updated successfully.";
             return RedirectToRoleDashboard();
         }
 
@@ -59,7 +57,6 @@ namespace SAS.Controllers
 
             _studentRepo.Delete(email);
 
-            TempData["SuccessMessage"] = "Student deleted successfully.";
             return RedirectToRoleDashboard();
         }
 

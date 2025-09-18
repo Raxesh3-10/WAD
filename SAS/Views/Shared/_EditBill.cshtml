@@ -1,6 +1,6 @@
 ﻿@model SAS.ViewModels.BillViewModel
 
-<form asp-controller="Bills" asp-action="Edit" method="post">
+<form asp-controller="Bills" asp-action="Edit" method="post" enctype="multipart/form-data">
     <input type="hidden" asp-for="Id" />
 
     <div class="form-group">
@@ -29,6 +29,38 @@
     <div class="form-group">
         <label asp-for="VendorEmail"></label>
         <input asp-for="VendorEmail" class="form-control" readonly />
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.Documents))
+
+    {
+        <div class="form-group">
+            <label>Existing Documents</label>
+            <ul class="list-group">
+                @{
+                    var docs = Model.Documents.Split(';', StringSplitOptions.RemoveEmptyEntries).ToList();
+
+
+
+                    for (int i = 0; i < docs.Count; i++)
+
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <a href="@docs[i]" target="_blank">Document @(@i + 1)</a>
+                            <div>
+                                <input type="checkbox" name="RemoveDocIndexes" value="@i" />
+                                <span class="ms-1">Remove</span>
+                            </div>
+                        </li>
+                    }
+                }
+            </ul>
+        </div>
+    }
+
+    <div class="form-group">
+        <label>Upload New Documents</label>
+        <input asp-for="NewDocuments" type="file" class="form-control" multiple />
     </div>
 
     <button type="submit" class="btn btn-success me-2">Save</button>

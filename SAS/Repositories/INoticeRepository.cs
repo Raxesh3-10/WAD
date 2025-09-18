@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Http;
 using SAS.Models;
 
 namespace SAS.Repositories
@@ -9,9 +8,9 @@ namespace SAS.Repositories
     {
         IEnumerable<Notice> GetAll();
         Notice? GetByEmail(string email);
-        void Add(Notice notice, List<IFormFile>? documents = null);
-        bool Update(string email, Notice updatedNotice, List<IFormFile>? newDocuments = null);
-        bool Delete(string email);
+        Notice? GetById(Guid id);
+        void Add(Notice notice);
+        bool Update(Notice notice);
         bool DeleteById(Guid id);
     }
 }

@@ -10,8 +10,8 @@ using SAS;
 namespace SAS.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250917112732_AddBillInUser")]
-    partial class AddBillInUser
+    [Migration("20250918152905_init")]
+    partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -33,15 +33,24 @@ namespace SAS.Migrations
                     b.Property<DateTime>("BillDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Documents")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("VendorId")
+                    b.Property<Guid?>("UserId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("VendorEmail")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("VendorName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("VendorId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Bills");
                 });
@@ -88,6 +97,7 @@ namespace SAS.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FatherName")
@@ -132,7 +142,8 @@ namespace SAS.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("FatherName")
                         .HasColumnType("nvarchar(max)");
@@ -157,6 +168,9 @@ namespace SAS.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Email")
+                        .IsUnique();
+
                     b.ToTable("Students");
                 });
 
@@ -170,8 +184,7 @@ namespace SAS.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(100)")
-                        .HasMaxLength(100);
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Password")
                         .HasColumnType("nvarchar(max)");
@@ -236,11 +249,9 @@ namespace SAS.Migrations
 
             modelBuilder.Entity("SAS.Models.Bill", b =>
                 {
-                    b.HasOne("SAS.Models.User", "Vendor")
+                    b.HasOne("SAS.Models.User", null)
                         .WithMany("Bills")
-                        .HasForeignKey("VendorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
                 });
 
             modelBuilder.Entity("SAS.Models.Notice", b =>

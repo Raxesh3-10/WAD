@@ -27,6 +27,7 @@ namespace SAS.Models
         public double Amount { get; set; }
 
         public DateTime BillDate { get; set; }
+        public string Documents { get; set; }
 
         public string VendorName { get; set; }
         public string VendorEmail { get; set; }

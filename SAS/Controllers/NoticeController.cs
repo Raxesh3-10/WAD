@@ -7,6 +7,7 @@ using SAS.Services;
 using AutoMapper;
 using System;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace SAS.Controllers
 {
@@ -16,17 +17,20 @@ namespace SAS.Controllers
         private readonly IRepository<User> _userRepo;
         private readonly IMapper _mapper;
         private readonly MailService _mailService;
+        private readonly CloudinaryService _cloudinary;
 
         public NoticeController(
             INoticeRepository noticeRepo,
             IRepository<User> userRepo,
             IMapper mapper,
-            MailService mailService)
+            MailService mailService,
+            CloudinaryService cloudinary)
         {
             _noticeRepo = noticeRepo;
             _userRepo = userRepo;
             _mapper = mapper;
             _mailService = mailService;
+            _cloudinary = cloudinary;
         }
 
         [HttpPost]
@@ -43,22 +47,23 @@ namespace SAS.Controllers
             notice.NoticeId = Guid.NewGuid();
             notice.UserId = currentUser.Id;
 
-            _noticeRepo.Add(notice, noticeVm.NewDocuments);
-
-            var users = _userRepo.GetAll().ToList();
-            foreach (var user in users)
+            // Upload new docs
+            var docUrls = new List<string>();
+            if (noticeVm.NewDocuments != null)
             {
-                if (!string.IsNullOrEmpty(user.Email))
+                foreach (var file in noticeVm.NewDocuments)
                 {
-                    _mailService.SendEmail(
-                        "New Notice - SAS Platform",
-                        "A new notice has been circulated. Please check it.",
-                        user.Email
-                    );
+                    var url = _cloudinary.UploadFile(file, "documents");
+                    if (!string.IsNullOrEmpty(url))
+                        docUrls.Add(url);
                 }
             }
+            notice.Documents = string.Join(",", docUrls);
 
-            TempData["SuccessMessage"] = "Notice created successfully.";
+            _noticeRepo.Add(notice);
+
+            NotifyUsers("New Notice - SAS Platform", "A new notice has been circulated. Please check it.");
+
             return RedirectToAction("Dashboard", "Principal");
         }
 
@@ -72,7 +77,7 @@ namespace SAS.Controllers
             var currentUser = GetCurrentUser();
             if (currentUser == null) return Unauthorized();
 
-            var existing = _noticeRepo.GetAll().FirstOrDefault(n => n.NoticeId == noticeVm.NoticeId);
+            var existing = _noticeRepo.GetById(noticeVm.NoticeId);
             if (existing == null) return NotFound();
 
             existing.Subject = noticeVm.Subject;
@@ -80,35 +85,40 @@ namespace SAS.Controllers
             existing.Date = noticeVm.Date;
             existing.UserId = currentUser.Id;
 
-            if (!string.IsNullOrEmpty(existing.Documents) && noticeVm.RemoveDocIndexes != null && noticeVm.RemoveDocIndexes.Count > 0)
-            {
-                var docList = existing.Documents.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
+            // Handle removals
+            var existingDocs = (existing.Documents ?? string.Empty)
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .ToList();
 
+            if (noticeVm.RemoveDocIndexes != null && noticeVm.RemoveDocIndexes.Any())
+            {
                 foreach (var index in noticeVm.RemoveDocIndexes.OrderByDescending(i => i))
                 {
-                    if (index >= 0 && index < docList.Count)
-                        docList.RemoveAt(index);
+                    if (index >= 0 && index < existingDocs.Count)
+                    {
+                        _cloudinary.DeleteFromCloudinary(existingDocs[index], false);
+                        existingDocs.RemoveAt(index);
+                    }
                 }
-
-                existing.Documents = string.Join(",", docList);
             }
 
-            _noticeRepo.Update(existing.User.Email, existing, noticeVm.NewDocuments);
-
-            var users = _userRepo.GetAll().ToList();
-            foreach (var user in users)
+            // Handle new uploads
+            if (noticeVm.NewDocuments != null)
             {
-                if (!string.IsNullOrEmpty(user.Email))
+                foreach (var file in noticeVm.NewDocuments)
                 {
-                    _mailService.SendEmail(
-                        "Notice Updated - SAS Platform",
-                        "A notice has been updated. Please check it.",
-                        user.Email
-                    );
+                    var url = _cloudinary.UploadFile(file, "documents");
+                    if (!string.IsNullOrEmpty(url))
+                        existingDocs.Add(url);
                 }
             }
 
-            TempData["SuccessMessage"] = "Notice updated successfully.";
+            existing.Documents = string.Join(",", existingDocs);
+
+            _noticeRepo.Update(existing);
+
+            NotifyUsers("Notice Updated - SAS Platform", "A notice has been updated. Please check it.");
+
             return RedirectToAction("Dashboard", "Principal");
         }
 
@@ -118,12 +128,20 @@ namespace SAS.Controllers
         {
             if (!IsAuthorized("principal", "trustee")) return Unauthorized();
 
-            var existing = _noticeRepo.GetAll().FirstOrDefault(n => n.NoticeId == id);
+            var existing = _noticeRepo.GetById(id);
             if (existing == null) return NotFound();
 
-            _noticeRepo.Delete(existing.User.Email);
+            if (!string.IsNullOrEmpty(existing.Documents))
+            {
+                var docs = existing.Documents.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                foreach (var doc in docs)
+                {
+                    _cloudinary.DeleteFromCloudinary(doc, false);
+                }
+            }
 
-            TempData["SuccessMessage"] = "Notice deleted successfully.";
+            _noticeRepo.DeleteById(id);
+
             return RedirectToAction("Dashboard", "Principal");
         }
 
@@ -132,7 +150,7 @@ namespace SAS.Controllers
         {
             if (!IsAuthorized("teacher", "staff", "principal", "trustee")) return Unauthorized();
 
-            var notice = _noticeRepo.GetAll().FirstOrDefault(n => n.NoticeId == id);
+            var notice = _noticeRepo.GetById(id);
             if (notice == null) return NotFound();
 
             var vm = _mapper.Map<NoticeViewModel>(notice);
@@ -162,6 +180,18 @@ namespace SAS.Controllers
         {
             var email = HttpContext.Session.GetString("UserEmail");
             return string.IsNullOrEmpty(email) ? null : _userRepo.GetByEmail(email);
+        }
+
+        private void NotifyUsers(string subject, string message)
+        {
+            var users = _userRepo.GetAll().ToList();
+            foreach (var user in users)
+            {
+                if (!string.IsNullOrEmpty(user.Email))
+                {
+                    _mailService.SendEmail(subject, message, user.Email);
+                }
+            }
         }
     }
 }

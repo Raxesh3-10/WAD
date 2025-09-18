@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 using SAS.Models;
 
 namespace SAS.ViewModels
@@ -17,6 +19,9 @@ namespace SAS.ViewModels
 
         [Required(ErrorMessage = "Bill date is required.")]
         public DateTime BillDate { get; set; }
+        public string? Documents { get; set; }
+        public List<IFormFile>? NewDocuments { get; set; }
+        public List<int>? RemoveDocIndexes { get; set; } = new List<int>();
         [Required]
         [StringLength(100)]
         public string VendorName { get; set; }

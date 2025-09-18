@@ -6,6 +6,7 @@
             <h4 class="card-title">Notices</h4>
         </div>
 
+        <!-- Create Notice Form -->
         <div class="mb-4">
             @await Html.PartialAsync("_CreateNotice", new SAS.ViewModels.NoticeViewModel())
         </div>
@@ -47,7 +48,7 @@
 
                         <div>
                             <button type="button" class="btn btn-sm btn-outline-primary me-2"
-                                    onclick="showEditForm('@n.NoticeId', '@n.Subject', '@n.Message', '@n.Date.ToString("yyyy-MM-dd")')">
+                                    onclick="showEditForm('@n.NoticeId', '@n.Subject', '@n.Message', '@n.Date.ToString("yyyy-MM-dd")', '@n.Documents')">
                                 Edit
                             </button>
 
@@ -62,6 +63,7 @@
             </ul>
         }
 
+        <!-- Hidden Edit Form -->
         <div id="editNoticeFormContainer" style="display:none;" class="mt-4">
             @await Html.PartialAsync("_EditNotice", new SAS.ViewModels.NoticeViewModel())
         </div>
@@ -69,13 +71,16 @@
 </div>
 
 <script>
-    function showEditForm(id, subject, message, date) {
-        document.querySelector('#editNoticeFormContainer input[name="NoticeId"]').value = id;
-        document.querySelector('#editNoticeFormContainer input[name="Subject"]').value = subject;
-        document.querySelector('#editNoticeFormContainer textarea[name="Message"]').value = message;
-        document.querySelector('#editNoticeFormContainer input[name="Date"]').value = date;
+    function showEditForm(id, subject, message, date, documents) {
+        const form = document.querySelector('#editNoticeFormContainer form');
 
-        document.getElementById('editNoticeFormContainer').style.display = 'block';
-        document.getElementById('editNoticeFormContainer').scrollIntoView({ behavior: 'smooth' });
-    }
+        form.querySelector('input[name="NoticeId"]').value = id;
+        form.querySelector('input[name="Subject"]').value = subject;
+            form.querySelector('textarea[name="Message"]').value = message;
+        form.querySelector('input[name="Date"]').value = date;
+
+        // Existing docs are rendered from server-side partial (_EditNotice)
+            document.getElementById('editNoticeFormContainer').style.display = 'block';
+            document.getElementById('editNoticeFormContainer').scrollIntoView({ behavior: 'smooth' });
+        }
 </script>

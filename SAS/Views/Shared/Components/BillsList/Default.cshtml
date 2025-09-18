@@ -96,9 +96,18 @@
 
                                 const formattedDate = bill.BillDate.split("T")[0];
 
+                                let docsHtml = "";
+                                if (bill.Documents) {
+                                    const docs = bill.Documents.split(";");
+                                    docsHtml = docs.map((doc, i) =>
+                                        `<a href="${doc}" target="_blank" class="me-2">Doc ${i + 1}</a>`
+                                    ).join("");
+                                }
+
                                 li.innerHTML = `
                                     <div>
                                         Amount: ₹${bill.Amount} - Vendor: ${bill.VendorName ?? ''} - Email: ${bill.VendorEmail ?? ''}
+                                        <div>${docsHtml}</div>
                                     </div>
                                     <div>
                                         <button type="button" action="/Bills/Edit/${bill.Id}" method="get"
