@@ -1,0 +1,8 @@
+{
+  "runtimeOptions": {
+    "additionalProbingPaths": [
+      "C:\\Users\\gotur\\.dotnet\\store\\|arch|\\|tfm|",
+      "C:\\Users\\gotur\\.nuget\\packages"
+    ]
+  }
+}
