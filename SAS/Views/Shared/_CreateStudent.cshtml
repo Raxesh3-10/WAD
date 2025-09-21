@@ -1,0 +1,93 @@
+﻿@model SAS.ViewModels.StudentViewModel
+
+<style>
+    /* 🔧 Remove number input spinner arrows (for Chrome, Edge, Safari) */
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    /* 🔧 Remove spinner for Firefox */
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+</style>
+
+<div class="d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+    <div class="card p-5 shadow-lg rounded-4 border-0" style="max-width: 800px; width: 100%;">
+        <div class="card-body">
+            <h4 class="card-title text-center fw-bolder mb-5" style="color: #006060;">Student Information</h4>
+
+            <form asp-action="CreateStudent" asp-controller="Student" method="post" enctype="multipart/form-data"
+                  class="row g-4">
+                @Html.AntiForgeryToken()
+
+                <div class="col-md-6">
+                    <label asp-for="StudentName" class="form-label fw-semibold"></label>
+                    <input asp-for="StudentName" class="form-control shadow-sm rounded-pill" placeholder="Enter Student Name" />
+                    <span asp-validation-for="StudentName" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="FatherName" class="form-label fw-semibold"></label>
+                    <input asp-for="FatherName" class="form-control shadow-sm rounded-pill" placeholder="Enter Father Name" />
+                    <span asp-validation-for="FatherName" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="MotherName" class="form-label fw-semibold"></label>
+                    <input asp-for="MotherName" class="form-control shadow-sm rounded-pill" placeholder="Enter Mother Name" />
+                    <span asp-validation-for="MotherName" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Email" class="form-label fw-semibold"></label>
+                    <input asp-for="Email" class="form-control shadow-sm rounded-pill" placeholder="Enter Email" />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="AadharNo" class="form-label fw-semibold"></label>
+                    <input asp-for="AadharNo" type="number" class="form-control shadow-sm rounded-pill" placeholder="Enter Aadhar Number" />
+                    <span asp-validation-for="AadharNo" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="RollNo" class="form-label fw-semibold"></label>
+                    <input asp-for="RollNo" type="number" class="form-control shadow-sm rounded-pill" placeholder="Enter Roll Number" />
+                    <span asp-validation-for="RollNo" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Div" class="form-label fw-semibold"></label>
+                    <input asp-for="Div" class="form-control shadow-sm rounded-pill" placeholder="Enter Division" />
+                    <span asp-validation-for="Div" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="Std" class="form-label fw-semibold"></label>
+                    <input asp-for="Std" class="form-control shadow-sm rounded-pill" placeholder="Enter Standard" />
+                    <span asp-validation-for="Std" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="PhoneNo" class="form-label fw-semibold"></label>
+                    <input asp-for="PhoneNo" type="number" class="form-control shadow-sm rounded-pill" placeholder="Enter Phone Number" />
+                    <span asp-validation-for="PhoneNo" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-6">
+                    <label asp-for="PhotoFile" class="form-label w-20 fw-semibold">Upload Photo</label>
+                    <input asp-for="PhotoFile" type="file" class="form-control shadow-sm rounded-pill" />
+                    <span asp-validation-for="PhotoFile" class="text-danger small"></span>
+                </div>
+
+                <div class="col-12 text-center mt-5">
+                    <button type="submit" class="btn w-50 shadow-sm rounded-pill py-2 text-white" style="background-color: #006060;">
+                        <i class="bi bi-check2-circle me-1"></i> Submit
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

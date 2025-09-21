@@ -1,0 +1,40 @@
+﻿@model SAS.ViewModels.NoticeViewModel
+
+<div class="card shadow-lg p-4 rounded-3">
+    <div class="card-body">
+
+        <form asp-action="CreateNotice" asp-controller="Notice" method="post" enctype="multipart/form-data" class="row g-4">
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" asp-for="NoticeId" />
+            <input type="hidden" asp-for="UserId" />
+
+            <div class="col-12">
+                <label asp-for="Subject" class="form-label text-center fw-bold d-block fs-4" style="color: #006060;">CREATE A NOTICE</label>
+                <input asp-for="Subject" class="form-control form-control-lg border-0 bg-light rounded-pill" placeholder="Subject" />
+                <span asp-validation-for="Subject" class="text-danger"></span>
+            </div>
+
+            <div class="col-12">
+                <label asp-for="Message" class="form-label text-muted"></label>
+                <textarea asp-for="Message" class="form-control form-control-lg border-0 bg-light" rows="5" placeholder="Message"></textarea>
+                <span asp-validation-for="Message" class="text-danger"></span>
+            </div>
+
+            <div class="col-12">
+                <label asp-for="Date" class="form-label text-muted"></label>
+                <input asp-for="Date" class="form-control form-control-lg border-0 bg-light" type="date" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                <span asp-validation-for="Date" class="text-danger"></span>
+            </div>
+
+            <div class="col-12">
+                <label class="form-label text-muted">Upload Documents</label>
+                <input asp-for="NewDocuments" type="file" multiple class="form-control form-control-lg" />
+            </div>
+
+            <div class="col-12 mt-4">
+                <button type="submit" class="btn w-100 btn-lg fw-bold text-white" style="background-color: #008080;">Submit Notice</button>
+            </div>
+        </form>
+    </div>
+</div>
