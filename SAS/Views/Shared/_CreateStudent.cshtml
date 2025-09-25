@@ -11,6 +11,11 @@
     input[type=number] {
         -moz-appearance: textfield;
     }
+    /* Style for the required asterisk */
+    .required-label::after {
+        content: " *";
+        color: red;
+    }
 </style>
 
 <div class="d-flex justify-content-center align-items-center" style="min-height: 100vh;">
@@ -23,62 +28,62 @@
                 @Html.AntiForgeryToken()
 
                 <div class="col-md-6">
-                    <label asp-for="StudentName" class="form-label fw-semibold"></label>
-                    <input asp-for="StudentName" class="form-control shadow-sm rounded-pill" placeholder="Enter Student Name" />
+                    <label asp-for="StudentName" class="form-label fw-semibold required-label"></label>
+                    <input asp-for="StudentName" class="form-control shadow-sm rounded-pill" placeholder="Enter Student Name" required />
                     <span asp-validation-for="StudentName" class="text-danger small"></span>
                 </div>
 
                 <div class="col-md-6">
-                    <label asp-for="FatherName" class="form-label fw-semibold"></label>
-                    <input asp-for="FatherName" class="form-control shadow-sm rounded-pill" placeholder="Enter Father Name" />
+                    <label asp-for="FatherName" class="form-label fw-semibold required-label"></label>
+                    <input asp-for="FatherName" class="form-control shadow-sm rounded-pill" placeholder="Enter Father Name" required />
                     <span asp-validation-for="FatherName" class="text-danger small"></span>
                 </div>
 
                 <div class="col-md-6">
-                    <label asp-for="MotherName" class="form-label fw-semibold"></label>
-                    <input asp-for="MotherName" class="form-control shadow-sm rounded-pill" placeholder="Enter Mother Name" />
+                    <label asp-for="MotherName" class="form-label fw-semibold required-label"></label>
+                    <input asp-for="MotherName" class="form-control shadow-sm rounded-pill" placeholder="Enter Mother Name" required />
                     <span asp-validation-for="MotherName" class="text-danger small"></span>
                 </div>
 
                 <div class="col-md-6">
-                    <label asp-for="Email" class="form-label fw-semibold"></label>
-                    <input asp-for="Email" class="form-control shadow-sm rounded-pill" placeholder="Enter Email" />
+                    <label asp-for="Email" class="form-label fw-semibold required-label"></label>
+                    <input asp-for="Email" class="form-control shadow-sm rounded-pill" placeholder="Enter Email" required />
                     <span asp-validation-for="Email" class="text-danger small"></span>
                 </div>
 
                 <div class="col-md-6">
-                    <label asp-for="AadharNo" class="form-label fw-semibold"></label>
-                    <input asp-for="AadharNo" type="number" class="form-control shadow-sm rounded-pill" placeholder="Enter Aadhar Number" />
+                    <label asp-for="AadharNo" class="form-label fw-semibold required-label"></label>
+                    <input asp-for="AadharNo" type="number" class="form-control shadow-sm rounded-pill" placeholder="Enter Aadhar Number" required />
                     <span asp-validation-for="AadharNo" class="text-danger small"></span>
                 </div>
 
                 <div class="col-md-6">
-                    <label asp-for="RollNo" class="form-label fw-semibold"></label>
-                    <input asp-for="RollNo" type="number" class="form-control shadow-sm rounded-pill" placeholder="Enter Roll Number" />
+                    <label asp-for="RollNo" class="form-label fw-semibold required-label"></label>
+                    <input asp-for="RollNo" type="number" class="form-control shadow-sm rounded-pill" placeholder="Enter Roll Number" required />
                     <span asp-validation-for="RollNo" class="text-danger small"></span>
                 </div>
 
                 <div class="col-md-6">
-                    <label asp-for="Div" class="form-label fw-semibold"></label>
-                    <input asp-for="Div" class="form-control shadow-sm rounded-pill" placeholder="Enter Division" />
+                    <label asp-for="Div" class="form-label fw-semibold required-label"></label>
+                    <input asp-for="Div" class="form-control shadow-sm rounded-pill" placeholder="Enter Division" required />
                     <span asp-validation-for="Div" class="text-danger small"></span>
                 </div>
 
                 <div class="col-md-6">
-                    <label asp-for="Std" class="form-label fw-semibold"></label>
-                    <input asp-for="Std" class="form-control shadow-sm rounded-pill" placeholder="Enter Standard" />
+                    <label asp-for="Std" class="form-label fw-semibold required-label"></label>
+                    <input asp-for="Std" class="form-control shadow-sm rounded-pill" placeholder="Enter Standard" required />
                     <span asp-validation-for="Std" class="text-danger small"></span>
                 </div>
 
                 <div class="col-md-6">
-                    <label asp-for="PhoneNo" class="form-label fw-semibold"></label>
-                    <input asp-for="PhoneNo" type="number" class="form-control shadow-sm rounded-pill" placeholder="Enter Phone Number" />
+                    <label asp-for="PhoneNo" class="form-label fw-semibold required-label"></label>
+                    <input asp-for="PhoneNo" type="number" class="form-control shadow-sm rounded-pill" placeholder="Enter Phone Number" required />
                     <span asp-validation-for="PhoneNo" class="text-danger small"></span>
                 </div>
 
                 <div class="col-md-6">
-                    <label asp-for="PhotoFile" class="form-label w-20 fw-semibold">Upload Photo</label>
-                    <input asp-for="PhotoFile" type="file" class="form-control shadow-sm rounded-pill" />
+                    <label asp-for="PhotoFile" class="form-label w-20 fw-semibold required-label">Upload Photo</label>
+                    <input asp-for="PhotoFile" type="file" class="form-control shadow-sm rounded-pill" required />
                     <span asp-validation-for="PhotoFile" class="text-danger small"></span>
                 </div>
 

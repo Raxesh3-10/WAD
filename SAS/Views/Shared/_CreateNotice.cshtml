@@ -1,5 +1,13 @@
 ﻿@model SAS.ViewModels.NoticeViewModel
 
+<style>
+    /* Style for the required asterisk */
+    .required-label::after {
+        content: " *";
+        color: red;
+    }
+</style>
+
 <div class="card shadow-lg p-4 rounded-3">
     <div class="card-body">
 
@@ -10,20 +18,20 @@
             <input type="hidden" asp-for="UserId" />
 
             <div class="col-12">
-                <label asp-for="Subject" class="form-label text-center fw-bold d-block fs-4" style="color: #006060;">CREATE A NOTICE</label>
-                <input asp-for="Subject" class="form-control form-control-lg border-0 bg-light rounded-pill" placeholder="Subject" />
+                <label asp-for="Subject" class="form-label text-center fw-bold d-block fs-4 required-label" style="color: #006060;">CREATE A NOTICE</label>
+                <input asp-for="Subject" class="form-control form-control-lg border-0 bg-light rounded-pill" placeholder="Subject" required />
                 <span asp-validation-for="Subject" class="text-danger"></span>
             </div>
 
             <div class="col-12">
-                <label asp-for="Message" class="form-label text-muted"></label>
-                <textarea asp-for="Message" class="form-control form-control-lg border-0 bg-light" rows="5" placeholder="Message"></textarea>
+                <label asp-for="Message" class="form-label text-muted required-label"></label>
+                <textarea asp-for="Message" class="form-control form-control-lg border-0 bg-light" rows="5" placeholder="Message" required></textarea>
                 <span asp-validation-for="Message" class="text-danger"></span>
             </div>
 
             <div class="col-12">
-                <label asp-for="Date" class="form-label text-muted"></label>
-                <input asp-for="Date" class="form-control form-control-lg border-0 bg-light" type="date" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                <label asp-for="Date" class="form-label text-muted required-label"></label>
+                <input asp-for="Date" class="form-control form-control-lg border-0 bg-light" type="date" value="@DateTime.Today.ToString("yyyy-MM-dd")" required />
                 <span asp-validation-for="Date" class="text-danger"></span>
             </div>
 
