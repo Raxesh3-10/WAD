@@ -101,7 +101,8 @@ namespace SAS.Controllers
             var refreshed = _repository.GetByUserId(userId.Value) ?? existing;
             var vm = _mapper.Map<UserDetailsViewModel>(refreshed);
             ViewData["EditMode"] = false;
-            return View("Login", "User");
+            ViewBag.StatusMsg = "Details are Updated";
+            return View("Details", vm);
         }
 
         private Guid? GetUserIdFromSession()

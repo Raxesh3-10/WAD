@@ -2,6 +2,8 @@
 @{
     ViewData["Title"] = "Trustee Dashboard";
 
+
+
     var profile = ViewBag.Profile as UserViewModel;
 
 
@@ -21,6 +23,20 @@
     var staffSalary = ViewBag.TotalStaffSalary ?? 0;
 
     var totalSalary = teacherSalary + principalSalary + staffSalary;
+
+
+
+    string FormatDate(DateTime? date)
+
+    {
+
+        return (date.HasValue && date.Value != DateTime.MinValue)
+
+            ? date.Value.ToShortDateString()
+
+            : string.Empty;
+
+    }
 }
 
 <div class="container mt-4">
@@ -55,70 +71,69 @@
         <div class="card-body">
             @if (principals != null && principals.Any())
             {
-            <table class="table table-striped table-bordered">
-                <thead>
-                    <tr>
-                        <th>Photo</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Address</th>
-                        <th>Salary</th>
-                        <th>DOB</th>
-                        <th>Experience</th>
-                        <th>Joining Date</th>
-                        <th>Subjects</th>
-                        <th>Standards</th>
-                        <th>Qualifications</th>
-                        <th>Documents</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var principal in principals)
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Photo</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Address</th>
+                            <th>Salary</th>
+                            <th>DOB</th>
+                            <th>Experience</th>
+                            <th>Joining Date</th>
+                            <th>Subjects</th>
+                            <th>Standards</th>
+                            <th>Qualifications</th>
+                            <th>Documents</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var principal in principals)
 
                         {
-                    <tr>
-                        <td>
-                            @if (!string.IsNullOrEmpty(principal.details?.Photo))
+                            <tr>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(principal.details?.Photo))
 
                                     {
-                            <img src="@principal.details.Photo" alt="Photo" style="width:50px;height:50px;" />
+                                        <img src="@principal.details.Photo" alt="Photo" style="width:50px;height:50px;" />
                                     }
-                        </td>
-                        <td>@principal.user?.Name</td>
-                        <td>@principal.user?.Email</td>
-                        <td>@principal.details?.Phone</td>
-                        <td>@principal.details?.Address</td>
-                        <td>@principal.details?.Salary.ToString("C")</td>
-                        <td>@principal.details?.Dob.ToShortDateString()</td>
-                        <td>@principal.details?.Experience</td>
-                        <td>@principal.details?.JoiningDate.ToShortDateString()</td>
-                        <td>@principal.details?.Subjects</td>
-                        <td>@principal.details?.Stds</td>
-                        <td>@principal.details?.Qualifications</td>
-                        <td>
-                            @if (!string.IsNullOrEmpty(principal.details?.Documents))
+                                </td>
+                                <td>@principal.user?.Name</td>
+                                <td>@principal.user?.Email</td>
+                                <td>@principal.details?.Phone</td>
+                                <td>@principal.details?.Address</td>
+                                <td>@principal.details?.Salary.ToString("C")</td>
+                                <td>@FormatDate(principal.details?.Dob)</td>
+                                <td>@principal.details?.Experience</td>
+                                <td>@FormatDate(principal.details?.JoiningDate)</td>
+                                <td>@principal.details?.Subjects</td>
+                                <td>@principal.details?.Stds</td>
+                                <td>@principal.details?.Qualifications</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(principal.details?.Documents))
 
                                     {
 
                                         foreach (var doc in principal.details.Documents.Split(',', StringSplitOptions.RemoveEmptyEntries))
 
                                         {
-                            <a href="@doc.Trim()" target="_blank">View</a>
-
-                            <br />
+                                            <a href="@doc.Trim()" target="_blank">View</a>
+                                            <br />
                                         }
 
                                     }
-                        </td>
-                    </tr>
+                                </td>
+                            </tr>
                         }
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
             }
             else
             {
-            <p class="text-muted">No principals found.</p>
+                <p class="text-muted">No principals found.</p>
             }
         </div>
     </div>
@@ -129,70 +144,69 @@
         <div class="card-body">
             @if (teachers != null && teachers.Any())
             {
-            <table class="table table-striped table-bordered">
-                <thead>
-                    <tr>
-                        <th>Photo</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Address</th>
-                        <th>Salary</th>
-                        <th>DOB</th>
-                        <th>Experience</th>
-                        <th>Joining Date</th>
-                        <th>Subjects</th>
-                        <th>Standards</th>
-                        <th>Qualifications</th>
-                        <th>Documents</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var teacher in teachers)
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Photo</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Address</th>
+                            <th>Salary</th>
+                            <th>DOB</th>
+                            <th>Experience</th>
+                            <th>Joining Date</th>
+                            <th>Subjects</th>
+                            <th>Standards</th>
+                            <th>Qualifications</th>
+                            <th>Documents</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var teacher in teachers)
 
                         {
-                    <tr>
-                        <td>
-                            @if (!string.IsNullOrEmpty(teacher.details?.Photo))
+                            <tr>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(teacher.details?.Photo))
 
                                     {
-                            <img src="@teacher.details.Photo" alt="Photo" style="width:50px;height:50px;" />
+                                        <img src="@teacher.details.Photo" alt="Photo" style="width:50px;height:50px;" />
                                     }
-                        </td>
-                        <td>@teacher.user?.Name</td>
-                        <td>@teacher.user?.Email</td>
-                        <td>@teacher.details?.Phone</td>
-                        <td>@teacher.details?.Address</td>
-                        <td>@teacher.details?.Salary.ToString("C")</td>
-                        <td>@teacher.details?.Dob.ToShortDateString()</td>
-                        <td>@teacher.details?.Experience</td>
-                        <td>@teacher.details?.JoiningDate.ToShortDateString()</td>
-                        <td>@teacher.details?.Subjects</td>
-                        <td>@teacher.details?.Stds</td>
-                        <td>@teacher.details?.Qualifications</td>
-                        <td>
-                            @if (!string.IsNullOrEmpty(teacher.details?.Documents))
+                                </td>
+                                <td>@teacher.user?.Name</td>
+                                <td>@teacher.user?.Email</td>
+                                <td>@teacher.details?.Phone</td>
+                                <td>@teacher.details?.Address</td>
+                                <td>@teacher.details?.Salary.ToString("C")</td>
+                                <td>@FormatDate(teacher.details?.Dob)</td>
+                                <td>@teacher.details?.Experience</td>
+                                <td>@FormatDate(teacher.details?.JoiningDate)</td>
+                                <td>@teacher.details?.Subjects</td>
+                                <td>@teacher.details?.Stds</td>
+                                <td>@teacher.details?.Qualifications</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(teacher.details?.Documents))
 
                                     {
 
                                         foreach (var doc in teacher.details.Documents.Split(',', StringSplitOptions.RemoveEmptyEntries))
 
                                         {
-                            <a href="@doc.Trim()" target="_blank">View</a>
-
-                            <br />
+                                            <a href="@doc.Trim()" target="_blank">View</a>
+                                            <br />
                                         }
 
                                     }
-                        </td>
-                    </tr>
+                                </td>
+                            </tr>
                         }
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
             }
             else
             {
-            <p class="text-muted">No teachers found.</p>
+                <p class="text-muted">No teachers found.</p>
             }
         </div>
     </div>
@@ -203,48 +217,48 @@
         <div class="card-body">
             @if (staffs != null && staffs.Any())
             {
-            <table class="table table-striped table-bordered">
-                <thead>
-                    <tr>
-                        <th>Photo</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Salary</th>
-                        <th>DOB</th>
-                        <th>Experience</th>
-                        <th>Joining Date</th>
-                        <th>Phone</th>
-                        <th>Address</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var staff in staffs)
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Photo</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Salary</th>
+                            <th>DOB</th>
+                            <th>Experience</th>
+                            <th>Joining Date</th>
+                            <th>Phone</th>
+                            <th>Address</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var staff in staffs)
 
                         {
-                    <tr>
-                        <td>
-                            @if (!string.IsNullOrEmpty(staff.details?.Photo))
+                            <tr>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(staff.details?.Photo))
 
                                     {
-                            <img src="@staff.details.Photo" alt="Photo" style="width:50px;height:50px;" />
+                                        <img src="@staff.details.Photo" alt="Photo" style="width:50px;height:50px;" />
                                     }
-                        </td>
-                        <td>@staff.user?.Name</td>
-                        <td>@staff.user?.Email</td>
-                        <td>@staff.details?.Salary.ToString("C")</td>
-                        <td>@staff.details?.Dob.ToShortDateString()</td>
-                        <td>@staff.details?.Experience</td>
-                        <td>@staff.details?.JoiningDate.ToShortDateString()</td>
-                        <td>@staff.details?.Phone</td>
-                        <td>@staff.details?.Address</td>
-                    </tr>
+                                </td>
+                                <td>@staff.user?.Name</td>
+                                <td>@staff.user?.Email</td>
+                                <td>@staff.details?.Salary.ToString("C")</td>
+                                <td>@FormatDate(staff.details?.Dob)</td>
+                                <td>@staff.details?.Experience</td>
+                                <td>@FormatDate(staff.details?.JoiningDate)</td>
+                                <td>@staff.details?.Phone</td>
+                                <td>@staff.details?.Address</td>
+                            </tr>
                         }
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
             }
             else
             {
-            <p class="text-muted">No staffs found.</p>
+                <p class="text-muted">No staffs found.</p>
             }
         </div>
     </div>

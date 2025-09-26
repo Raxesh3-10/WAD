@@ -1,10 +1,42 @@
-﻿@* Views/Shared/_UserNavbar.cshtml *@
+﻿@using Microsoft.AspNetCore.Http
+
+@{
+    var role = Context?.Session.GetString("UserRole")?.ToLower();
+
+    string dashboardController = "Home";
+
+    string dashboardAction = "Index";
+     if (role == "teacher")
+
+    {
+
+        dashboardController = "Teacher";
+
+        dashboardAction = "Dashboard";
+
+    }
+
+    else if (role == "staff")
+
+    {
+
+        dashboardController = "Staff";
+
+        dashboardAction = "Dashboard";
+
+    }
+}
 <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #006060;">
     <div class="container">
 
-        <a class="navbar-brand text-white fw-bold" asp-controller="Home" asp-action="Index">SAS Platform</a>
+        <a class="navbar-brand text-white fw-bold"
+           asp-controller="@dashboardController"
+           asp-action="@dashboardAction">
+            SAS Platform
+        </a>
 
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
 

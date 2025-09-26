@@ -66,10 +66,11 @@
 
                 <p><strong>Salary:</strong> @Model.Salary</p>
 
-                <p>
-                    <strong>Date of Birth:</strong>
-                    @(Model.Dob == DateTime.MinValue ? "—" : Model.Dob.ToString("dd/MM/yyyy"))
-                </p>
+                @if (Model.Dob > DateTime.MinValue)
+
+                {
+                    <p><strong>Date of Birth:</strong> @Model.Dob.ToString("dd/MM/yyyy")</p>
+                }
 
                 <p><strong>Photo:</strong></p>
                 @if (!string.IsNullOrEmpty(Model.Photo))
@@ -86,10 +87,11 @@
 
                 <p><strong>Experience:</strong> @Model.Experience years</p>
 
-                <p>
-                    <strong>Joining Date:</strong>
-                    @(Model.JoiningDate == DateTime.MinValue ? "—" : Model.JoiningDate.ToString("dd/MM/yyyy"))
-                </p>
+                @if (Model.JoiningDate > DateTime.MinValue)
+
+                {
+                    <p><strong>Joining Date:</strong> @Model.JoiningDate.ToString("dd/MM/yyyy")</p>
+                }
 
                 <p><strong>Address:</strong> @Model.Address</p>
                 <p><strong>Phone:</strong> @Model.Phone</p>
@@ -151,8 +153,8 @@
                     <span asp-validation-for="Salary" class="text-danger"></span>
 
                     <label class="mt-3">Date of Birth</label>
-                    <input name="Dob" type="date" class="form-control"
-                           value="@(Model.Dob == DateTime.MinValue ? "" : Model.Dob.ToString("yyyy-MM-dd"))" />
+                    <input asp-for="Dob" type="date" class="form-control"
+                           value="@(Model.Dob > DateTime.MinValue ? Model.Dob.ToString("yyyy-MM-dd") : string.Empty)" />
                     <span asp-validation-for="Dob" class="text-danger"></span>
 
                     <label class="mt-3">Experience (years)</label>
@@ -160,8 +162,8 @@
                     <span asp-validation-for="Experience" class="text-danger"></span>
 
                     <label class="mt-3">Joining Date</label>
-                    <input name="JoiningDate" type="date" class="form-control"
-                           value="@(Model.JoiningDate == DateTime.MinValue ? "" : Model.JoiningDate.ToString("yyyy-MM-dd"))" />
+                    <input asp-for="JoiningDate" type="date" class="form-control"
+                           value="@(Model.JoiningDate > DateTime.MinValue ? Model.JoiningDate.ToString("yyyy-MM-dd") : string.Empty)" />
                     <span asp-validation-for="JoiningDate" class="text-danger"></span>
 
                     <label class="mt-3">Address</label>

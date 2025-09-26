@@ -9,6 +9,20 @@
     var teachers = ViewBag.Teachers as List<DetailsViewModel>;
 
     var staffs = ViewBag.Staffs as List<DetailsViewModel>;
+
+
+
+    string FormatDate(DateTime? date)
+
+    {
+
+        return (date.HasValue && date.Value != DateTime.MinValue)
+
+            ? date.Value.ToShortDateString()
+
+            : string.Empty;
+
+    }
 }
 
 <div class="container mt-4">
@@ -87,9 +101,9 @@
                                 <td>@teacher.details?.Stds</td>
                                 <td>@teacher.details?.Qualifications</td>
                                 <td>@teacher.details?.Salary.ToString("C")</td>
-                                <td>@teacher.details?.Dob.ToShortDateString()</td>
+                                <td>@FormatDate(teacher.details?.Dob)</td>
                                 <td>@teacher.details?.Experience</td>
-                                <td>@teacher.details?.JoiningDate.ToShortDateString()</td>
+                                <td>@FormatDate(teacher.details?.JoiningDate)</td>
                                 <td>@teacher.details?.Phone</td>
                                 <td>@teacher.details?.Address</td>
                                 <td>
@@ -101,7 +115,6 @@
 
                                         {
                                             <a href="@doc.Trim()" target="_blank">View</a>
-
                                             <br />
                                         }
 
@@ -154,9 +167,9 @@
                                 <td>@staff.user?.Name</td>
                                 <td>@staff.user?.Email</td>
                                 <td>@staff.details?.Salary.ToString("C")</td>
-                                <td>@staff.details?.Dob.ToShortDateString()</td>
+                                <td>@FormatDate(staff.details?.Dob)</td>
                                 <td>@staff.details?.Experience</td>
-                                <td>@staff.details?.JoiningDate.ToShortDateString()</td>
+                                <td>@FormatDate(staff.details?.JoiningDate)</td>
                                 <td>@staff.details?.Phone</td>
                                 <td>@staff.details?.Address</td>
                             </tr>
