@@ -1,12 +1,88 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\DDU\\Sem 5\\WAD\\Project\\",
-  "Documents": [],
+  "WorkspaceRootPath": "C:\\Users\\gotur\\OneDrive\\Documents\\SAS\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{73476009-2991-44F9-94F9-0A69E2BDC3CD}|SAS\\SAS.csproj|c:\\users\\gotur\\onedrive\\documents\\sas\\sas\\controllers\\usercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{73476009-2991-44F9-94F9-0A69E2BDC3CD}|SAS\\SAS.csproj|solutionrelative:sas\\controllers\\usercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{73476009-2991-44F9-94F9-0A69E2BDC3CD}|SAS\\SAS.csproj|c:\\users\\gotur\\onedrive\\documents\\sas\\sas\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{73476009-2991-44F9-94F9-0A69E2BDC3CD}|SAS\\SAS.csproj|solutionrelative:sas\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{73476009-2991-44F9-94F9-0A69E2BDC3CD}|SAS\\SAS.csproj|c:\\users\\gotur\\onedrive\\documents\\sas\\sas\\viewmodels\\userviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{73476009-2991-44F9-94F9-0A69E2BDC3CD}|SAS\\SAS.csproj|solutionrelative:sas\\viewmodels\\userviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{73476009-2991-44F9-94F9-0A69E2BDC3CD}|SAS\\SAS.csproj|c:\\users\\gotur\\onedrive\\documents\\sas\\sas\\views\\userdetails\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{73476009-2991-44F9-94F9-0A69E2BDC3CD}|SAS\\SAS.csproj|solutionrelative:sas\\views\\userdetails\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
       "VerticalTabListWidth": 256,
-      "DocumentGroups": []
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "User.cs",
+              "DocumentMoniker": "C:\\Users\\gotur\\OneDrive\\Documents\\SAS\\SAS\\Models\\User.cs",
+              "RelativeDocumentMoniker": "SAS\\Models\\User.cs",
+              "ToolTip": "C:\\Users\\gotur\\OneDrive\\Documents\\SAS\\SAS\\Models\\User.cs",
+              "RelativeToolTip": "SAS\\Models\\User.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-26T08:28:32.229Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "UserViewModel.cs",
+              "DocumentMoniker": "C:\\Users\\gotur\\OneDrive\\Documents\\SAS\\SAS\\ViewModels\\UserViewModel.cs",
+              "RelativeDocumentMoniker": "SAS\\ViewModels\\UserViewModel.cs",
+              "ToolTip": "C:\\Users\\gotur\\OneDrive\\Documents\\SAS\\SAS\\ViewModels\\UserViewModel.cs",
+              "RelativeToolTip": "SAS\\ViewModels\\UserViewModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABcAAAAVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-26T08:24:43.328Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "UserController.cs",
+              "DocumentMoniker": "C:\\Users\\gotur\\OneDrive\\Documents\\SAS\\SAS\\Controllers\\UserController.cs",
+              "RelativeDocumentMoniker": "SAS\\Controllers\\UserController.cs",
+              "ToolTip": "C:\\Users\\gotur\\OneDrive\\Documents\\SAS\\SAS\\Controllers\\UserController.cs",
+              "RelativeToolTip": "SAS\\Controllers\\UserController.cs",
+              "ViewState": "AgIAAHUAAAAAAAAAAAAmwHcAAAAPAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-26T08:23:49.615Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Details.cshtml",
+              "DocumentMoniker": "C:\\Users\\gotur\\OneDrive\\Documents\\SAS\\SAS\\Views\\UserDetails\\Details.cshtml",
+              "RelativeDocumentMoniker": "SAS\\Views\\UserDetails\\Details.cshtml",
+              "ToolTip": "C:\\Users\\gotur\\OneDrive\\Documents\\SAS\\SAS\\Views\\UserDetails\\Details.cshtml",
+              "RelativeToolTip": "SAS\\Views\\UserDetails\\Details.cshtml",
+              "ViewState": "AgIAAJwAAAAAAAAAAAAowL8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-09-26T08:15:09.584Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
     }
   ]
 }
