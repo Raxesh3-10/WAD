@@ -1,0 +1,86 @@
+﻿@model List<SAS.ViewModels.NoticeViewModel>
+
+<div class="card mb-4 shadow-sm" id="notice-component">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="card-title">Notices</h4>
+        </div>
+
+        <!-- Create Notice Form -->
+        <div class="mb-4">
+            @await Html.PartialAsync("_CreateNotice", new SAS.ViewModels.NoticeViewModel())
+        </div>
+
+        @if (Model == null || !Model.Any())
+
+        {
+            <p class="text-muted">No notices available.</p>
+        }
+
+        else
+
+        {
+            <ul class="list-group">
+                @foreach (var n in Model)
+
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-start">
+                        <div>
+                            <strong>@n.Subject</strong><br />
+                            <span>@n.Message</span><br />
+                            <small>Date: @n.Date.ToShortDateString()</small>
+
+                            @if (!string.IsNullOrEmpty(n.Documents))
+                            {
+
+                                var docs = n.Documents.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                                <div class="mt-2 d-flex flex-wrap gap-2">
+                                    @for (int i = 0; i < docs.Length; i++)
+                                    {
+                                        <a href="@docs[i]" target="_blank"
+                                           class="badge bg-light text-primary border rounded px-2 py-1 text-decoration-none">
+                                            Document @(i + 1)
+                                        </a>
+                                    }
+                                </div>
+                            }
+                        </div>
+
+                        <div>
+                            <button type="button" class="btn btn-sm btn-outline-primary me-2"
+                                    onclick="showEditForm('@n.NoticeId', '@n.Subject', '@n.Message', '@n.Date.ToString("yyyy-MM-dd")', '@n.Documents')">
+                                Edit
+                            </button>
+
+                            <form asp-action="DeleteNotice" asp-controller="Notice" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@n.NoticeId" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                            </form>
+                        </div>
+                    </li>
+                }
+            </ul>
+        }
+
+        <!-- Hidden Edit Form -->
+        <div id="editNoticeFormContainer" style="display:none;" class="mt-4">
+            @await Html.PartialAsync("_EditNotice", new SAS.ViewModels.NoticeViewModel())
+        </div>
+    </div>
+</div>
+
+<script>
+    function showEditForm(id, subject, message, date, documents) {
+        const form = document.querySelector('#editNoticeFormContainer form');
+
+        form.querySelector('input[name="NoticeId"]').value = id;
+        form.querySelector('input[name="Subject"]').value = subject;
+            form.querySelector('textarea[name="Message"]').value = message;
+        form.querySelector('input[name="Date"]').value = date;
+
+        // Existing docs are rendered from server-side partial (_EditNotice)
+            document.getElementById('editNoticeFormContainer').style.display = 'block';
+            document.getElementById('editNoticeFormContainer').scrollIntoView({ behavior: 'smooth' });
+        }
+</script>

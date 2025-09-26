@@ -1,0 +1,27 @@
+﻿@* Views/Shared/_Navbar.cshtml *@
+<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #006060;">
+    <div class="container">
+        <a class="navbar-brand text-white fw-bold fs-4 d-flex align-items-center" asp-controller="Home" asp-action="Index">
+            <img src="~/SAS.png" alt="SAS Logo" style="height: 30px; margin-right: 10px;">
+            SAS Platform
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link text-white" asp-controller="User" asp-action="Login">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" asp-controller="User" asp-action="Signup">Signup</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" asp-controller="User" asp-action="ReportBug">Report Issues</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

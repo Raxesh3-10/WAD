@@ -1,0 +1,69 @@
+﻿@model SAS.ViewModels.NoticeViewModel
+
+<div class="card shadow-lg p-4 rounded-3">
+    <div class="card-body">
+        <h4 class="card-title text-center fw-bold mb-4" style="color: #006060;">Edit Notice</h4>
+
+        <form asp-action="EditNotice" asp-controller="Notice" method="post" enctype="multipart/form-data" class="row g-4">
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" asp-for="NoticeId" />
+            <input type="hidden" asp-for="UserId" />
+
+            <div class="col-12">
+                <label asp-for="Subject" class="form-label text-muted"></label>
+                <input asp-for="Subject" class="form-control form-control-lg border-0 bg-light" placeholder="Subject" required />
+                <span asp-validation-for="Subject" class="text-danger"></span>
+            </div>
+
+            <div class="col-12">
+                <label asp-for="Message" class="form-label text-muted"></label>
+                <textarea asp-for="Message" class="form-control form-control-lg border-0 bg-light" rows="5" placeholder="Message" required></textarea>
+                <span asp-validation-for="Message" class="text-danger"></span>
+            </div>
+
+            <div class="col-12">
+                <label asp-for="Date" class="form-label text-muted"></label>
+                <input asp-for="Date" class="form-control form-control-lg border-0 bg-light" type="date" value="@Model.Date.ToString("yyyy-MM-dd")" required />
+                <span asp-validation-for="Date" class="text-danger"></span>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.Documents))
+            {
+                var docs = Model.Documents.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            <div class="col-12">
+                <label class="form-label text-muted">Existing Documents</label>
+                <div class="d-flex flex-wrap gap-3">
+                    @for (int i = 0; i < docs.Length; i++)
+                        {
+                    <div class="p-2 border rounded-pill d-flex align-items-center justify-content-between bg-light">
+                        <a href="@docs[i]" target="_blank" class="text-decoration-none text-info fw-bold me-2">
+                            <i class="fas fa-file-alt me-1"></i> Doc @(i + 1)
+                        </a>
+                        <label class="form-check-label text-danger small-font">
+                            <input type="checkbox" name="RemoveDocIndexes" value="@i" class="form-check-input me-1" />
+                            Remove
+                        </label>
+                    </div>
+                        }
+                </div>
+            </div>
+            }
+
+            <div class="col-12">
+                <label class="form-label text-muted">Upload New Documents</label>
+                <input asp-for="NewDocuments" type="file" multiple class="form-control form-control-lg" />
+            </div>
+
+            <div class="col-12 mt-4">
+                <button type="submit" class="btn w-100 btn-lg fw-bold text-white" style="background-color: #006060;">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .small-font {
+        font-size: 0.85em;
+    }
+</style>

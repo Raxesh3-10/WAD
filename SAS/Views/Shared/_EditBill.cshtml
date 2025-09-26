@@ -1,0 +1,78 @@
+﻿@model SAS.ViewModels.BillViewModel
+
+<div class="d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+    <div class="card p-5 shadow-lg rounded-4 border-0" style="max-width: 600px; width: 100%;">
+        <div class="card-body">
+            <h4 class="card-title text-center fw-bolder mb-5" style="color: #006060;">EDIT BILL</h4>
+            <form asp-controller="Bills" asp-action="Edit" method="post" enctype="multipart/form-data" class="row g-4">
+                <input type="hidden" asp-for="Id" />
+
+                <div class="col-12">
+                    <label asp-for="Type" class="form-label text-muted"></label>
+                    <select asp-for="Type" class="form-select form-control-lg bg-light border-0" asp-items="Html.GetEnumSelectList<SAS.Models.BillType>()" required></select>
+                    <span asp-validation-for="Type" class="text-danger"></span>
+                </div>
+
+                <div class="col-12">
+                    <label asp-for="Amount" class="form-label text-muted"></label>
+                    <input asp-for="Amount" class="form-control form-control-lg bg-light border-0" required />
+                    <span asp-validation-for="Amount" class="text-danger"></span>
+                </div>
+
+                <div class="col-12">
+                    <label asp-for="BillDate" class="form-label text-muted"></label>
+                    <input asp-for="BillDate" type="date" class="form-control form-control-lg bg-light border-0" required />
+                    <span asp-validation-for="BillDate" class="text-danger"></span>
+                </div>
+
+                <div class="col-12">
+                    <label asp-for="VendorName" class="form-label text-muted"></label>
+                    <input asp-for="VendorName" class="form-control form-control-lg bg-light border-0" readonly />
+                </div>
+
+                <div class="col-12">
+                    <label asp-for="VendorEmail" class="form-label text-muted"></label>
+                    <input asp-for="VendorEmail" class="form-control form-control-lg bg-light border-0" readonly />
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.Documents))
+                {
+                <div class="col-12">
+                    <label class="form-label text-muted">Existing Documents</label>
+                    <ul class="list-group list-group-flush border rounded-3">
+                        @{
+                                var docs = Model.Documents.Split(';', StringSplitOptions.RemoveEmptyEntries).ToList();
+
+                                for (int i = 0; i < docs.Count; i++)
+                                {
+                            <li class="list-group-item d-flex justify-content-between align-items-center bg-light">
+                                <a href="@docs[i]" target="_blank" class="text-decoration-none text-info fw-bold">Document @(@i + 1)</a>
+                                <div>
+                                    <input type="checkbox" name="RemoveDocIndexes" value="@i" class="form-check-input me-1" />
+                                    <span class="ms-1 text-danger small">Remove</span>
+                                </div>
+                            </li>
+                                }
+                        }
+                    </ul>
+                </div>
+                }
+
+                <div class="col-12">
+                    <label class="form-label text-muted">Upload New Documents</label>
+                    <input asp-for="NewDocuments" type="file" class="form-control form-control-lg" multiple />
+                </div>
+
+                <div class="col-12 d-flex justify-content-end gap-2 mt-5">
+                    <button type="submit" class="btn btn-lg fw-bold text-white" style="background-color: #006060;">Save</button>
+                    <button type="button" class="btn btn-secondary btn-lg fw-bold" onclick="document.getElementById('editBillContainer').innerHTML=''">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<style>
+    .small {
+        font-size: 0.85em;
+    }
+</style>

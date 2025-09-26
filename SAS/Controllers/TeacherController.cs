@@ -1,0 +1,48 @@
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using SAS.Models;
+using SAS.Repositories;
+using SAS.ViewModels;
+using AutoMapper;
+using System.Linq;
+
+namespace SAS.Controllers
+{
+    public class TeacherController : Controller
+    {
+        private readonly IRepository<User> _userRepo;
+        private readonly IMapper _mapper;
+
+        public TeacherController(
+            IRepository<User> userRepo,
+            IMapper mapper
+        )
+        {
+            _userRepo = userRepo;
+            _mapper = mapper;
+        }
+
+        public IActionResult Dashboard()
+        {
+            if (!IsAuthorized("teacher")) return HandleUnauthorized();
+
+            var currentUser = GetCurrentUser();
+            ViewBag.Profile = _mapper.Map<UserViewModel>(currentUser);
+            
+            return View();
+        }
+        private IActionResult HandleUnauthorized()
+        {
+            HttpContext.Session.Clear();
+            return RedirectToAction("Login", "User");
+        }
+        private bool IsAuthorized(string role) =>
+            HttpContext.Session.GetString("UserRole") == role;
+
+        private User? GetCurrentUser()
+        {
+            var email = HttpContext.Session.GetString("UserEmail");
+            return _userRepo.GetByEmail(email ?? "");
+        }
+    }
+}
