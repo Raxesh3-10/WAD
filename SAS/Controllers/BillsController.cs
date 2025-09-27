@@ -29,6 +29,7 @@ namespace SAS.Controllers
         public IActionResult Create(BillViewModel billVm)
         {
             if (!IsAuthorized("staff")) return Unauthorized();
+            if (!ModelState.IsValid) return View("_CreateBill",billVm);
 
             var bill = _mapper.Map<Bill>(billVm);
             bill.Id = Guid.NewGuid();
@@ -74,6 +75,8 @@ namespace SAS.Controllers
         public IActionResult Edit(Guid id, BillViewModel vm)
         {
             if (!IsAuthorized("staff", "principal")) return HandleUnauthorized();
+            if (!ModelState.IsValid) return View("_EditBill",vm);
+
             if (id != vm.Id) return NotFound();
 
             var bill = _billRepo.GetById(id);
@@ -122,6 +125,7 @@ namespace SAS.Controllers
         public IActionResult Delete(Guid id)
         {
             if (!IsAuthorized("staff", "principal")) return HandleUnauthorized();
+            if (!ModelState.IsValid) return RedirectToRoleDashboard();
 
             var bill = _billRepo.GetById(id);
             if (bill != null && !string.IsNullOrEmpty(bill.Documents))

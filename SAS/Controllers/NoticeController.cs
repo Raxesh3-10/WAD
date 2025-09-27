@@ -38,7 +38,7 @@ namespace SAS.Controllers
         public IActionResult CreateNotice(NoticeViewModel noticeVm)
         {
             if (!IsAuthorized("principal", "trustee")) return Unauthorized();
-            if (!ModelState.IsValid) return ViewComponent("Notice");
+            if (!ModelState.IsValid) return View("_CreateNotice",noticeVm);
 
             var currentUser = GetCurrentUser();
             if (currentUser == null) return Unauthorized();
@@ -71,7 +71,7 @@ namespace SAS.Controllers
         public IActionResult EditNotice(NoticeViewModel noticeVm)
         {
             if (!IsAuthorized("principal", "trustee")) return Unauthorized();
-            if (!ModelState.IsValid) return ViewComponent("Notice");
+            if (!ModelState.IsValid) return View("_EditNotice", noticeVm);
 
             var currentUser = GetCurrentUser();
             if (currentUser == null) return Unauthorized();

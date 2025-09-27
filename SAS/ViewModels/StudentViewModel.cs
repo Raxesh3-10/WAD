@@ -22,8 +22,8 @@ namespace SAS.ViewModels
         public string Email { get; set; }
 
         [Required(ErrorMessage = "Aadhar number is required.")]
-        [Range(100000000000, 999999999999, ErrorMessage = "Aadhar number must be exactly 12 digits.")]
-        public long AadharNo { get; set; }
+        [RegularExpression(@"^\d{12}$", ErrorMessage = "Aadhar number must be exactly 12 digits.")]
+        public string AadharNo { get; set; }
 
         [Required(ErrorMessage = "Roll number is required.")]
         [Range(1, int.MaxValue, ErrorMessage = "Roll number must be a positive number.")]
@@ -38,12 +38,11 @@ namespace SAS.ViewModels
         public int Std { get; set; }
 
         [Required(ErrorMessage = "Phone number is required.")]
-        [Range(1000000000, 9999999999, ErrorMessage = "Phone number must be 10 digits and cannot start with 0.")]
-        public long PhoneNo { get; set; }
+        [RegularExpression(@"^[1-9][0-9]{9}$", ErrorMessage = "Phone number must be 10 digits and cannot start with 0.")]
+        public string PhoneNo { get; set; }
 
         public string? PhotoUrl { get; set; }
 
         public IFormFile? PhotoFile { get; set; }
-
     }
 }

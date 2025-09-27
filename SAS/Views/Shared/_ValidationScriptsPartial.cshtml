@@ -1,1 +1,19 @@
-﻿
+﻿@* _ValidationScriptsPartial.cshtml *@
+@section Scripts {
+    <environment include="Development">
+        <script src="~/lib/jquery/dist/jquery.js"></script>
+        <script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
+        <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
+    </environment>
+    <environment exclude="Development">
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+                integrity="sha256-/xUj+3OJ4xnF2JvKBYf0joh6e3I/cJXQFjBf3vQqxLk="
+                crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"
+                integrity="sha512-2a0o5LQynV3qRo+R5HDpFjAcZ47AqF1x9YVGHfBfT6Db5tKZ0sS9h+vhw5n26H2TpXZt6AwK2R+J2r3mW0YF5g=="
+                crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"
+                integrity="sha512-0b0n86ZyH/jj6YvTn+0zA9TJ5cZL4q7rkGv3pXkM9V2/4+PwK2Wczr3gdb1ZtA6q5mGj2Cw7iFZ1q1hk8yqzvg=="
+                crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    </environment>
+}

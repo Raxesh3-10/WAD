@@ -2,6 +2,9 @@
 
 <div class="container mt-4">
     <h3 class="text-center" style="color: #006060;">Generate Timetable</h3>
+
+    <div asp-validation-summary="All" class="alert alert-danger"></div>
+
     <form asp-controller="Timetable" asp-action="GenerateTimetable" method="post" class="row g-3">
         <div class="col-md-4">
             <label>Lecture Duration (minutes)</label>
@@ -39,12 +42,30 @@
             <span asp-validation-for="DaysInWeek" class="text-danger"></span>
         </div>
 
-        <div class="col-md-4">
-            <label>Standard (STD)</label>
-            <input asp-for="Stds" class="form-control" type="number" required />
+        <!-- ✅ Multiple STD selection -->
+        <div class="col-md-6">
+            <label>Standards (hold CTRL/Command to select multiple)</label>
+            <select asp-for="Stds" class="form-control" multiple size="6">
+                <option value="1">STD 1</option>
+                <option value="2">STD 2</option>
+                <option value="3">STD 3</option>
+                <option value="4">STD 4</option>
+                <option value="5">STD 5</option>
+                <option value="6">STD 6</option>
+                <option value="7">STD 7</option>
+                <option value="8">STD 8</option>
+                <option value="9">STD 9</option>
+                <option value="10">STD 10</option>
+                <option value="11">STD 11</option>
+                <option value="12">STD 12</option>
+            </select>
+            <span asp-validation-for="Stds" class="text-danger"></span>
         </div>
 
         <div class="col-12">
-            <button type="submit" class="btn text-white w-100" style="background-color: #006060;">Generate Timetable PDF</button>        </div>
+            <button type="submit" class="btn text-white w-100" style="background-color: #006060;">
+                Generate Timetable PDF
+            </button>
+        </div>
     </form>
 </div>

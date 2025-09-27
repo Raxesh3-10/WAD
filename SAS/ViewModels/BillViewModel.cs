@@ -18,14 +18,12 @@ namespace SAS.ViewModels
         public double Amount { get; set; }
 
         [Required(ErrorMessage = "Bill date is required.")]
-        public DateTime BillDate { get; set; }
+        public DateTime BillDate { get; set; } = DateTime.Now;
         public string? Documents { get; set; }
         public List<IFormFile>? NewDocuments { get; set; }
         public List<int>? RemoveDocIndexes { get; set; } = new List<int>();
-        [Required]
         [StringLength(100)]
         public string VendorName { get; set; }
-        [Required]
         [EmailAddress]
         public string VendorEmail { get; set; }
     }

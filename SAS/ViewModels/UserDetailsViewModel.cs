@@ -7,13 +7,10 @@ namespace SAS.ViewModels
 {
     public class UserDetailsViewModel
     {
-        [Required(ErrorMessage = "Subjects are required.")]
         public string Subjects { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Standards are required.")]
         public string Stds { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Qualifications are required.")]
         public string Qualifications { get; set; } = string.Empty;
 
         public string Documents { get; set; } = string.Empty;

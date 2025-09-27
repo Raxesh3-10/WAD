@@ -27,7 +27,7 @@ namespace SAS.Controllers
         public IActionResult CreateStudent(StudentViewModel studentVm)
         {
             if (!IsAuthorized("principal", "teacher")) return HandleUnauthorized();
-            if (!ModelState.IsValid) return RedirectToRoleDashboard();
+            if (!ModelState.IsValid) return View("_CreateStudent", studentVm);
 
             var student = _mapper.Map<Student>(studentVm);
             _studentRepo.Add(student, studentVm.PhotoFile);
@@ -39,7 +39,7 @@ namespace SAS.Controllers
         public IActionResult EditStudent(StudentViewModel studentVm)
         {
             if (!IsAuthorized("principal", "teacher")) return HandleUnauthorized();
-            if (!ModelState.IsValid) return View(studentVm);
+            if (!ModelState.IsValid) return View("_EditStudent",studentVm);
 
             var updatedStudent = _mapper.Map<Student>(studentVm);
             _studentRepo.Update(studentVm.Email, updatedStudent, studentVm.PhotoFile);

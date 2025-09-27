@@ -30,151 +30,208 @@ namespace SAS.Controllers
         [HttpPost]
         public IActionResult GenerateTimetable(TimetableViewModel model)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-            var std = model.Stds?.FirstOrDefault() ?? 0;
-            if (std == 0) return BadRequest("STD is required.");
+            if (!ModelState.IsValid)
+                return View("~/Views/Shared/Components/Timetable/default.cshtml", model);
 
-            var usersForStd = _userDetailsRepo.GetAll().Where(ud => UserHasStd(ud, std)).ToList();
-            if (!usersForStd.Any()) return NotFound($"No teachers or staff found for STD {std}");
-
-            var divisions = _studentRepo.GetAll()
-                .Where(s => s.Std == std && !string.IsNullOrWhiteSpace(s.Div))
-                .Select(s => s.Div.Trim().ToUpper())
-                .Distinct()
-                .OrderBy(d => d)
-                .ToList();
-            if (!divisions.Any()) return NotFound($"No divisions found for STD {std}");
-
-            var teachers = usersForStd
-                .Select(ud => new
-                {
-                    Name = _userRepo.GetAll().FirstOrDefault(u => u.Id == ud.UserId)?.Name,
-                    Subjects = ParseSubjects(ud.Subjects)
-                })
-                .Where(t => !string.IsNullOrWhiteSpace(t.Name) && t.Subjects.Any())
-                .ToList();
-            if (!teachers.Any()) return NotFound($"No teachers with subjects found for STD {std}");
-
-            var subjectTeacherMap = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
-            foreach (var t in teachers)
-                foreach (var sub in t.Subjects)
-                {
-                    var subjectKey = sub.Trim();
-                    if (string.IsNullOrEmpty(subjectKey)) continue;
-                    if (!subjectTeacherMap.ContainsKey(subjectKey)) subjectTeacherMap[subjectKey] = new List<string>();
-                    if (!subjectTeacherMap[subjectKey].Contains(t.Name!, StringComparer.OrdinalIgnoreCase))
-                        subjectTeacherMap[subjectKey].Add(t.Name!);
-                }
-            if (!subjectTeacherMap.Any()) return NotFound($"No subject-to-teacher mapping available for STD {std}");
-
-            var teacherSchedule = new Dictionary<string, Dictionary<string, List<string>>>(StringComparer.OrdinalIgnoreCase);
-            var timetableData = new Dictionary<string, Dictionary<string, List<Slot>>>();
-            var nopCountPerDay = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (var div in divisions)
+            if (model.Stds == null || !model.Stds.Any())
             {
-                var subjects = subjectTeacherMap.Keys.ToList();
-                var timetableGenerator = new EqualDistributionTimetableGenerator(
-                    model.LectureDuration, model.StartTime, model.EndTime,
-                    model.LunchStart, model.LunchDuration, model.DaysInWeek, subjects
-                );
-                var schedule = timetableGenerator.GetSchedule();
-
-                foreach (var day in schedule.Keys.ToList())
-                {
-                    int nopCountDay = 0;
-                    var slots = schedule[day];
-                    for (int i = 0; i < slots.Count; i++)
-                    {
-                        var slot = slots[i];
-                        if (string.Equals(slot.Subject, "Lunch Break", StringComparison.OrdinalIgnoreCase)) continue;
-                        if (!subjectTeacherMap.TryGetValue(slot.Subject, out var availableForSubject))
-                        {
-                            slot.Teacher = "NOP";
-                            nopCountDay++;
-                        }
-                        else
-                        {
-                            var availableTeachers = Shuffle(availableForSubject)
-                                .Where(tName =>
-                                {
-                                    if (!teacherSchedule.ContainsKey(tName)) teacherSchedule[tName] = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
-                                    if (!teacherSchedule[tName].ContainsKey(day)) teacherSchedule[tName][day] = new List<string>();
-                                    return !teacherSchedule[tName][day].Contains($"{slot.Start}-{slot.End}");
-                                }).ToList();
-                            var assignedTeacher = availableTeachers.Any() ? RandomPick(availableTeachers) : "NOP";
-                            if (assignedTeacher == "NOP") nopCountDay++;
-                            if (assignedTeacher != "NOP")
-                            {
-                                if (!teacherSchedule.ContainsKey(assignedTeacher)) teacherSchedule[assignedTeacher] = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
-                                if (!teacherSchedule[assignedTeacher].ContainsKey(day)) teacherSchedule[assignedTeacher][day] = new List<string>();
-                                teacherSchedule[assignedTeacher][day].Add($"{slot.Start}-{slot.End}");
-                            }
-                            slot.Teacher = assignedTeacher;
-                        }
-                    }
-                    schedule[day] = slots.OrderBy(s => TimeSpan.Parse(s.Start)).ToList();
-                    nopCountPerDay[$"{div}-{day}"] = nopCountDay;
-                }
-                timetableData[div] = schedule;
+                ModelState.AddModelError("", "At least one STD is required.");
+                return View("~/Views/Shared/Components/Timetable/default.cshtml", model);
             }
 
-            var pdfStream = new System.IO.MemoryStream();
-            Document.Create(container =>
+            try
             {
-                foreach (var div in divisions)
+                var pdfStream = new System.IO.MemoryStream();
+
+                // 🔑 Keep teacherSchedule GLOBAL to avoid conflicts across STDs
+                var teacherSchedule = new Dictionary<string, Dictionary<string, List<string>>>(StringComparer.OrdinalIgnoreCase);
+
+                Document.Create(container =>
                 {
-                    container.Page(page =>
+                    foreach (var std in model.Stds)
                     {
-                        page.Margin(15);
-                        page.Size(PageSizes.A4.Landscape());
-                        page.DefaultTextStyle(x => x.FontSize(9));
+                        // === Get teachers for STD ===
+                        var usersForStd = _userDetailsRepo.GetAll()
+                            .Where(ud => UserHasStd(ud, std))
+                            .ToList();
+                        if (!usersForStd.Any())
+                            throw new InvalidOperationException($"No teachers found for STD {std}.");
 
-                        page.Header().Text($"Timetable for STD {std} - Division {div}")
-                            .FontSize(14).SemiBold().AlignCenter();
+                        // === Get divisions ===
+                        var divisions = _studentRepo.GetAll()
+                            .Where(s => s.Std == std && !string.IsNullOrWhiteSpace(s.Div))
+                            .Select(s => s.Div.Trim().ToUpper())
+                            .Distinct()
+                            .OrderBy(d => d)
+                            .ToList();
+                        if (!divisions.Any())
+                            throw new InvalidOperationException($"No students/divisions found for STD {std}.");
 
-                        page.Content().Table(table =>
+                        // === Get teachers with subjects ===
+                        var teachers = usersForStd
+                            .Select(ud => new
+                            {
+                                Name = _userRepo.GetAll().FirstOrDefault(u => u.Id == ud.UserId)?.Name,
+                                Subjects = ParseSubjects(ud.Subjects)
+                            })
+                            .Where(t => !string.IsNullOrWhiteSpace(t.Name) && t.Subjects.Any())
+                            .ToList();
+                        if (!teachers.Any())
+                            throw new InvalidOperationException($"No teachers with subjects found for STD {std}.");
+
+                        // === Subject → Teacher mapping ===
+                        var subjectTeacherMap = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+                        foreach (var t in teachers)
                         {
-                            var firstDay = timetableData[div].First().Value;
-                            table.ColumnsDefinition(columns =>
+                            foreach (var sub in t.Subjects)
                             {
-                                columns.RelativeColumn(1);
-                                foreach (var slot in firstDay)
-                                    columns.RelativeColumn(2); 
-                            });
-
-                            table.Header(header =>
-                            {
-                                header.Cell().Element(CellHeader).Text("Day");
-                                foreach (var slot in firstDay)
-                                {
-                                    header.Cell().Element(CellHeader)
-                                        .Text($"{slot.Start}-{slot.End}");
-                                }
-                            });
-
-                            foreach (var day in timetableData[div].Keys)
-                            {
-                                table.Cell().Element(CellHeader).Text(day);
-                                foreach (var slot in timetableData[div][day])
-                                {
-                                    var text = slot.Subject;
-                                    if (!string.IsNullOrWhiteSpace(slot.Teacher))
-                                        text += $"\n({slot.Teacher})";
-                                    table.Cell().Element(CellBody).Text(text);
-                                }
+                                var subjectKey = sub.Trim();
+                                if (string.IsNullOrEmpty(subjectKey)) continue;
+                                if (!subjectTeacherMap.ContainsKey(subjectKey))
+                                    subjectTeacherMap[subjectKey] = new List<string>();
+                                if (!subjectTeacherMap[subjectKey].Contains(t.Name!, StringComparer.OrdinalIgnoreCase))
+                                    subjectTeacherMap[subjectKey].Add(t.Name!);
                             }
-                        });
-                    });
-                }
-            }).GeneratePdf(pdfStream);
+                        }
+                        if (!subjectTeacherMap.Any())
+                            throw new InvalidOperationException($"No subject-teacher mapping found for STD {std}.");
 
-            pdfStream.Position = 0;
-            return File(pdfStream, "application/pdf", $"timetable_std{std}.pdf");
+                        // === Generate timetable (merge all divisions in one table) ===
+                        var timetableData = new Dictionary<string, Dictionary<string, List<Slot>>>();
+
+                        foreach (var div in divisions)
+                        {
+                            var subjects = subjectTeacherMap.Keys.ToList();
+                            var timetableGenerator = new EqualDistributionTimetableGenerator(
+                                model.LectureDuration,
+                                model.StartTime,
+                                model.EndTime,
+                                model.LunchStart,
+                                model.LunchDuration,
+                                model.DaysInWeek,
+                                subjects
+                            );
+
+                            var schedule = timetableGenerator.GetSchedule();
+
+                            foreach (var day in schedule.Keys.ToList())
+                            {
+                                var slots = schedule[day];
+                                for (int i = 0; i < slots.Count; i++)
+                                {
+                                    var slot = slots[i];
+                                    if (string.Equals(slot.Subject, "Lunch Break", StringComparison.OrdinalIgnoreCase))
+                                        continue;
+
+                                    if (!subjectTeacherMap.TryGetValue(slot.Subject, out var availableForSubject))
+                                    {
+                                        slot.Teacher = "NOP";
+                                    }
+                                    else
+                                    {
+                                        var availableTeachers = Shuffle(availableForSubject)
+                                            .Where(tName =>
+                                            {
+                                                if (!teacherSchedule.ContainsKey(tName))
+                                                    teacherSchedule[tName] = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+                                                if (!teacherSchedule[tName].ContainsKey(day))
+                                                    teacherSchedule[tName][day] = new List<string>();
+                                                return !teacherSchedule[tName][day].Contains($"{slot.Start}-{slot.End}");
+                                            })
+                                            .ToList();
+
+                                        var assignedTeacher = availableTeachers.Any() ? RandomPick(availableTeachers) : "NOP";
+
+                                        if (assignedTeacher != "NOP")
+                                        {
+                                            if (!teacherSchedule.ContainsKey(assignedTeacher))
+                                                teacherSchedule[assignedTeacher] = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+                                            if (!teacherSchedule[assignedTeacher].ContainsKey(day))
+                                                teacherSchedule[assignedTeacher][day] = new List<string>();
+                                            teacherSchedule[assignedTeacher][day].Add($"{slot.Start}-{slot.End}");
+                                        }
+
+                                        slot.Teacher = assignedTeacher;
+                                    }
+                                }
+                                schedule[day] = slots.OrderBy(s => TimeSpan.Parse(s.Start)).ToList();
+                            }
+
+                            timetableData[div] = schedule;
+                        }
+
+                        // === Single Page for this STD ===
+                        container.Page(page =>
+                        {
+                            page.Margin(15);
+                            page.Size(PageSizes.A4.Landscape());
+                            page.DefaultTextStyle(x => x.FontSize(9));
+
+                            page.Header().Text($"Timetable for STD {std}")
+                                .FontSize(14).SemiBold().AlignCenter();
+
+                            page.Content().Table(table =>
+                            {
+                                var firstDiv = timetableData.Keys.First();
+                                var firstDay = timetableData[firstDiv].First().Value;
+
+                                table.ColumnsDefinition(columns =>
+                                {
+                                    columns.RelativeColumn(1); // Day
+                                    foreach (var slot in firstDay)
+                                        columns.RelativeColumn(2); // Time slots
+                                });
+
+                                // === Table Header ===
+                                table.Header(header =>
+                                {
+                                    header.Cell().Element(CellHeader).Text("Day / Division");
+                                    foreach (var slot in firstDay)
+                                    {
+                                        header.Cell().Element(CellHeader)
+                                            .Text($"{slot.Start}-{slot.End}");
+                                    }
+                                });
+
+                                // === Rows: day × division ===
+                                foreach (var day in timetableData[firstDiv].Keys)
+                                {
+                                    foreach (var div in divisions)
+                                    {
+                                        table.Cell().Element(CellHeader).Text($"{day} ({div})");
+                                        foreach (var slot in timetableData[div][day])
+                                        {
+                                            var text = slot.Subject;
+                                            if (!string.IsNullOrWhiteSpace(slot.Teacher))
+                                                text += $"\n({slot.Teacher})";
+                                            table.Cell().Element(CellBody).Text(text);
+                                        }
+                                    }
+                                }
+                            });
+                        });
+                    }
+                }).GeneratePdf(pdfStream);
+
+                pdfStream.Position = 0;
+                return File(pdfStream, "application/pdf", "timetable_all.pdf");
+            }
+            catch (InvalidOperationException ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                return View("~/Views/Shared/Components/Timetable/default.cshtml", model);
+            }
+            catch (Exception)
+            {
+                ModelState.AddModelError("", "An unexpected error occurred while generating the timetable.");
+                return View("~/Views/Shared/Components/Timetable/default.cshtml", model);
+            }
         }
 
+        // === Helpers ===
         private static IContainer CellHeader(IContainer container) =>
-            container.Padding(3).Background(Colors.Grey.Lighten2).Border(1).BorderColor(Colors.Grey.Medium).AlignCenter();
+            container.Padding(3).Background(Colors.Grey.Lighten2)
+                .Border(1).BorderColor(Colors.Grey.Medium).AlignCenter();
 
         private static IContainer CellBody(IContainer container) =>
             container.Padding(3).Border(1).BorderColor(Colors.Grey.Lighten2).AlignCenter();
@@ -203,6 +260,16 @@ namespace SAS.Controllers
             return list[rng.Next(list.Count)];
         }
 
+        // === Slot Class ===
+        private class Slot
+        {
+            public string Start { get; set; } = string.Empty;
+            public string End { get; set; } = string.Empty;
+            public string Subject { get; set; } = string.Empty;
+            public string Teacher { get; set; }
+        }
+
+        // === Generator ===
         private class EqualDistributionTimetableGenerator
         {
             private readonly int lectureDuration;
@@ -213,8 +280,14 @@ namespace SAS.Controllers
             private readonly int daysInWeek;
             private readonly List<string> subjects;
 
-            public EqualDistributionTimetableGenerator(int lectureDuration, TimeSpan startTime,
-                TimeSpan endTime, TimeSpan lunchStart, int lunchDuration, int daysInWeek, List<string> subjects)
+            public EqualDistributionTimetableGenerator(
+                int lectureDuration,
+                TimeSpan startTime,
+                TimeSpan endTime,
+                TimeSpan lunchStart,
+                int lunchDuration,
+                int daysInWeek,
+                List<string> subjects)
             {
                 this.lectureDuration = lectureDuration;
                 this.startTime = startTime;
@@ -235,10 +308,12 @@ namespace SAS.Controllers
                     .Take(daysInWeek)
                     .ToList();
                 int subjectIndex = 0;
+
                 foreach (var day in days)
                 {
                     var slots = new List<Slot>();
                     var currentTime = startTime;
+
                     for (int i = 0; i < slotsPerDay; i++)
                     {
                         var slotEnd = currentTime.Add(TimeSpan.FromMinutes(lectureDuration));
@@ -254,6 +329,7 @@ namespace SAS.Controllers
                             currentTime = currentTime.Add(TimeSpan.FromMinutes(lunchDuration));
                             continue;
                         }
+
                         var subject = subjects[subjectIndex % subjects.Count];
                         subjectIndex++;
                         slots.Add(new Slot
@@ -265,8 +341,10 @@ namespace SAS.Controllers
                         });
                         currentTime = slotEnd;
                     }
+
                     schedule[day] = slots;
                 }
+
                 return schedule;
             }
         }
